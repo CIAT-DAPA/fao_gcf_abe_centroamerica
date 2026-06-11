@@ -22,7 +22,7 @@ mask <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd_msk_30s.tif")
 scn_list <- "ssp_585"
 
 
-for (scn in scn_list){
+#for (scn in scn_list){
   
   gcmList <- list.dirs(paste0(dDir, "/", scn), recursive = FALSE, full.names = FALSE)
   
@@ -114,5 +114,5 @@ for (scn in scn_list){
     
   }
   
-}
+#}
 
