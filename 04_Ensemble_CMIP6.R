@@ -9,11 +9,11 @@ require(raster)
 #require(rgdal)
 
 ## Parameters
-dDir <- "E:/fao_gcf_abe/02_climate_change/dom_2_5min"
-oDir <- "E:/fao_gcf_abe/02_climate_change/dom_2_5min_ens"
-scn_list <- c("ssp_126", "ssp_245", "ssp_370", "ssp_585") 
-# scn_list <- "ssp_585"
-perList <- c("2030s", "2050s", "2070s") #, "2090s")
+dDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_30s_anom"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_30s_anom_ens"
+scn_list <- c("ssp_245","ssp_585")
+scn_list <- "ssp_585"
+perList <- c("2050s", "2070s","2090s") #, "2030s")
 varList <- c("prec", "tmax", "tmin", "tmean")
 seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
 
