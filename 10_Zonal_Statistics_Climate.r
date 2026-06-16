@@ -1,30 +1,31 @@
 # Carlos Navarro 
 # UNIGIS 2020A
 # Purpose: Statistics of climate projections
-
 # Load libraries
+
 require(raster)
 require(maptools)
-require(rgdal)
+require(sf)
 require(dismo)
 
 # Set params
-cDir <- "D:/cenavarro/msc_gis_thesis/01_baseline/wcl_v21_2_5min"
-fDir <- "D:/cenavarro/msc_gis_thesis/02_climate_change/camexca_2_5min_anom_ens"
+cDir <- "Z:/1.Data/Results/climate/01_baseline/pan/atlas_1981-2022_30s"
+fDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_30s_anom_ens"
 varLs <- c("prec", "tmean", "tmax", "tmin")
-oDir <- "D:/cenavarro/bid_mag_pasar/climate_change/uncertainties"
-#mask <- "D:/cenavarro/msc_gis_thesis/00_admin_data/CAMEXCA_adm0.shp"
-mask <- "D:/cenavarro/bid_mag_pasar/_admin_data/IMN_regiones_prj.shp"
-sspLs <- c("ssp_126", "ssp_245", "ssp_585")
-prdLs <- c("2030s", "2050s", "2070s")
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations"
+mask <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"
+sspLs <- c("ssp_245", "ssp_585")
+prdLs <- c("2050s", "2070s")
 ssnLs <- c("djf", "mam", "jja", "son", "ann")
 
-if (!file.exists(paste0(oDir))) {dir.create(paste0(oDir), recursive = TRUE)}
+if (!file.exists(paste0(oDir))) {
+  dir.create(paste0(oDir), recursive = TRUE)
+}
 
 # Read mask
-poly <- readOGR(mask) 
-poly <- poly[poly$ID != "7", ]
-poly$CTR_CODE <- c(1:nrow(poly))
+poly <- sf::st_read(mask, quiet = TRUE)
+poly <- as(poly, "Spatial")
+poly$CTR_CODE <- 1:nrow(poly)
 id <- "CTR_CODE"
 
 #####################################
@@ -40,6 +41,8 @@ for (var in varLs){
   # Load current climate files
   cStk <- stack(paste0(cDir, "/", var, "_", 1:12, ".tif"))
   
+  poly <- spTransform(poly, crs(cStk))
+  
   ## Rasterize polygon
   cStk_crop <- crop(cStk, extent(poly))
   extent(cStk_crop) <- extent(poly)
@@ -47,7 +50,7 @@ for (var in varLs){
   
   ## Calculate stats for current
   cStk_stat <- zonal(cStk_crop, poly_rs, mean)
-  stats <- rbind(stats, cbind("current", "1971-2000", var, "mean", cStk_stat))
+  stats <- rbind(stats, cbind("current", "1981-2022", var, "mean", cStk_stat))
   
   cat(paste("\n >. Calcs stats current", var))
   
@@ -107,7 +110,7 @@ for (var in varLs){
 colnames(stats) <- c("ssp", "Period", "Variable", "Stat", "Zone", 1:12)
 
 # Write the outputs
-write.csv(stats, paste0(oDir, "/climate_stats_by_month_v2.csv"), row.names=F)
+write.csv(stats, paste0(oDir, "/climate_stats_by_month.csv"), row.names=F)
  
 cat("\nDone!!!")
 
@@ -131,13 +134,14 @@ for (var in varLs){
   cStk <- stack(paste0(cDir, "/", var, "_", ssnLs, ".tif"))
   
   ## Rasterize polygon
+  poly <- spTransform(poly, crs(cStk))
   cStk_crop <- crop(cStk, extent(poly))
   extent(cStk_crop) <- extent(poly)
   poly_rs <- rasterize(poly, cStk_crop[[1]], id)
   
   ## Calculate stats for current
   cStk_stat <- zonal(cStk_crop, poly_rs, mean)
-  stats <- rbind(stats, cbind("current", "1971-2000", var, "mean", cStk_stat))
+  stats <- rbind(stats, cbind("current", "1981-2022", var, "mean", cStk_stat))
   
   cat(paste("\n >. Calcs stats current", var))
   
@@ -197,6 +201,7 @@ for (var in varLs){
 colnames(stats) <- c("ssp", "Period", "Variable", "Stat", "Zone", ssnLs)
 
 # Write the outputs
-write.csv(stats, paste0(oDir, "/climate_stats_by_season_v2.csv"), row.names=F)
+write.csv(stats, paste0(oDir, "/climate_stats_by_season.csv"), row.names=F)
 
 cat("\nDone!!!")
+

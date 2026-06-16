@@ -14,10 +14,16 @@ require(maptools)
 require(rgdal)
 require(ggplot2)
 
-sspLs <- c("ssp_126", "ssp_245","ssp_585")
-oDir <- "D:/cenavarro/msc_gis_thesis/02_climate_change/evaluations/statistics"
-oStat <- "D:/cenavarro/msc_gis_thesis/02_climate_change/evaluations/statistics/climate_stats_by_season.csv"
-ctrList <- c("BHS", "BLZ", "CRI", "CUB", "DOM", "GTM", "HND", "HTI", "JAM", "NIC", "PAN", "PRI", "SLV", "MEX")
+sspLs <- c("ssp_245","ssp_585") #"ssp_126",
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations"
+oStat <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations/climate_stats_by_season.csv"
+#ctrList <- c("BHS", "BLZ", "CRI", "CUB", "DOM", "GTM", "HND", "HTI", "JAM", "NIC", "PAN", "PRI", "SLV", "MEX")
+#ctrList <- c("CRI")
+oDirU <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations"
+
+mask <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"
+poly <- sf::st_read(mask, quiet = TRUE)
+ctrList <- poly$ID_Micro
 
 anomVals <- read.csv(oStat, header=T)
 anomVals <- anomVals[anomVals$ssp != "current", ] 
@@ -28,10 +34,11 @@ anomVals[anomVals == "2070s"] <- 2070
 anomVals_pr <- anomVals[anomVals$Variable == "prec",]
 anomVals_tm <- anomVals[anomVals$Variable == "tmean",]
 
+
 for(ssp in sspLs){
   
   ## Prec
-  # ssp <- sspLs[1]
+  #ssp <- sspLs[1]
   anomVals_pr_ssp <- anomVals_pr[anomVals_pr$ssp == ssp, ]
   
   anomVals_pr_avg <- anomVals_pr_ssp[anomVals_pr_ssp$Stat == "mean", ]
@@ -49,12 +56,23 @@ for(ssp in sspLs){
   
   
   anomVals_pr_sts$MEAN = as.numeric(anomVals_pr_sts$MEAN)*100
-  anomVals_pr_sts$P25 = as.numeric(anomVals_pr_sts$P25)*100
-  anomVals_pr_sts$P75 = as.numeric(anomVals_pr_sts$P75)*100
+  anomVals_pr_sts$P25  = as.numeric(anomVals_pr_sts$P25)*100
+  anomVals_pr_sts$P75  = as.numeric(anomVals_pr_sts$P75)*100
   anomVals_pr_sts$PERIOD = as.numeric(anomVals_pr_sts$PERIOD)
-  anomVals_pr_sts$ZONE <- ctrList
   
-  PlotP <- paste0(oDir, "/uncertainties_prec_", ssp, ".tif")
+  # # Recalcular media para DEF y MAM
+  # idx <- anomVals_pr_sts$SEASON %in% c("DEF", "MAM")
+  # 
+  # anomVals_pr_sts$MEAN[idx] <-
+  #   (anomVals_pr_sts$P25[idx] + anomVals_pr_sts$P75[idx]) / 2
+  # 
+  anomVals_pr_sts$MEAN <- pmax(pmin(anomVals_pr_sts$MEAN, 100), -100)
+  anomVals_pr_sts$P25  <- pmax(pmin(anomVals_pr_sts$P25, 100), -100)
+  anomVals_pr_sts$P75  <- pmax(pmin(anomVals_pr_sts$P75, 100), -100)
+  
+  anomVals_pr_sts$ZONE <- ctrList
+
+  PlotP <- paste0(oDirU, "/uncertainties_prec_by_zones_", ssp, ".tif")
   
   p <- ggplot() +
     geom_line(data=anomVals_pr_sts, aes(x=PERIOD, y=MEAN, colour="band", group=1), linewidth=1) +
@@ -66,13 +84,13 @@ for(ssp in sspLs){
     guides(fill=guide_legend(title=NULL), color=guide_legend(title=NULL), alpha=FALSE) +
     scale_color_manual("", values="royalblue4") +
     scale_fill_manual("", values="royalblue4") +
-    scale_x_continuous(breaks = seq(2030, 2070, 20), ) +
+    scale_x_continuous(breaks = seq(2050, 2070, 20), ) +
     theme(legend.position="none") +
-    ylim(-40, 20) + 
+    ylim(-100, 100) + 
     facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (%)")
   
-  tiff(PlotP, width=600, height=1800, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=600, height=1200, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   
@@ -102,14 +120,15 @@ for(ssp in sspLs){
   anomVals_tm_sts$P75 = as.numeric(anomVals_tm_sts$P75)
   anomVals_tm_sts$PERIOD = as.numeric(anomVals_tm_sts$PERIOD)
   anomVals_tm_sts$ZONE <- ctrList
+
   
-  PlotP <- paste0(oDir, "/uncertainties_tmean_", ssp, ".tif")
+  PlotP <- paste0(oDirU, "/uncertainties_tmean_by_zones_", ssp, ".tif")
   
   p <- ggplot() +
     geom_line(data=anomVals_tm_sts, aes(x=PERIOD, y=MEAN, colour="band", group=1), linewidth=1) +
     # geom_point(data=anomVals_tm_sts, aes(x=PERIOD, y=MEAN, colour="band", group=1), size=1) +
     geom_ribbon(data=anomVals_tm_sts, aes(x=PERIOD, ymin=P25, ymax=P75, fill="firebrick4", group=1), alpha=0.5, linewidth=0.2) +
-    geom_hline(yintercept=2, linetype="dashed", color = "black", linewidth=0.1) +
+    #geom_hline(yintercept=2, linetype="dashed", color = "black", linewidth=0.1) +
     theme(panel.background = element_rect(fill = 'gray97', linetype = 2, linewidth = 0.2), legend.title=element_blank(), axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5)) +
     # theme_bw() +
     guides(fill=guide_legend(title=NULL), color=guide_legend(title=NULL), alpha=FALSE) +
@@ -121,9 +140,10 @@ for(ssp in sspLs){
     facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (C)")
   
-  tiff(PlotP, width=600, height=1800, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=600, height=1200, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   
 }
+
 
