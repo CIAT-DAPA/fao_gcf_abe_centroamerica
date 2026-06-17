@@ -19,7 +19,7 @@ library(sf)
 # Set params
 bDir <- "Z:/1.Data/Results/climate/01_baseline/pan/atlas_1981-2022_30s"
 oDir <- "Z:/1.Data/Results/climate/01_baseline/pan/evaluation"
-varList <- c("tmax", "tmin", "tmean") #"prec"
+varList <- c("tmax", "tmin", "tmean", "prec")
 varList <- c("etp", "hurs", "rsds", "wspd") 
 id <- c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
 seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
@@ -216,12 +216,12 @@ for (var in varList){
   
   if (var == "prec"){
     
-    stk_crop[which(stk_crop[]>1600)]=1600
+    stk_crop[which(stk_crop[]>2400)]=2400
     
     plot <- setZ(stk_crop, id_mod)
     names(plot) <- toupper(id_mod)
     
-    zvalues <- seq(0, 1600, 100) # Define limits
+    zvalues <- seq(0, 2400, 100) # Define limits
     myTheme <- BuRdTheme() # Define squeme of colors
     myTheme$regions$col=colorRampPalette(c("khaki1", "skyblue1", "blue", "darkblue", "darkmagenta"))(length(zvalues)-1) # Set new colors
     # myTheme=rasterTheme(region=brewer.pal('Blues', n=9))
