@@ -15,19 +15,21 @@ require(rgdal)
 require(ggplot2)
 
 sspLs <- c("ssp_245","ssp_585") #"ssp_126",
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations"
-oStat <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations/climate_stats_by_season.csv"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations"
+oStat <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations/climate_stats_by_season_v2.csv"
 #ctrList <- c("BHS", "BLZ", "CRI", "CUB", "DOM", "GTM", "HND", "HTI", "JAM", "NIC", "PAN", "PRI", "SLV", "MEX")
-#ctrList <- c("CRI")
-oDirU <- "Z:/1.Data/Results/climate/02_climate_change/pan_evaluations"
+oDirU <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations"
 
-mask <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"
+# mask <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"
+mask <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"
+mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif"
+
 poly <- sf::st_read(mask, quiet = TRUE)
-ctrList <- poly$ID_Micro
+ctrList <- c("Guayubin", "Mao")
 
 anomVals <- read.csv(oStat, header=T)
 anomVals <- anomVals[anomVals$ssp != "current", ] 
-anomVals[anomVals == "2030s"] <- 2030
+# anomVals[anomVals == "2030s"] <- 2030
 anomVals[anomVals == "2050s"] <- 2050
 anomVals[anomVals == "2070s"] <- 2070
 
@@ -63,12 +65,11 @@ for(ssp in sspLs){
   # # Recalcular media para DEF y MAM
   # idx <- anomVals_pr_sts$SEASON %in% c("DEF", "MAM")
   # 
-  # anomVals_pr_sts$MEAN[idx] <-
-  #   (anomVals_pr_sts$P25[idx] + anomVals_pr_sts$P75[idx]) / 2
+  # anomVals_pr_sts$MEAN <- (anomVals_pr_sts$P25 + anomVals_pr_sts$P75) / 2
   # 
-  anomVals_pr_sts$MEAN <- pmax(pmin(anomVals_pr_sts$MEAN, 100), -100)
-  anomVals_pr_sts$P25  <- pmax(pmin(anomVals_pr_sts$P25, 100), -100)
-  anomVals_pr_sts$P75  <- pmax(pmin(anomVals_pr_sts$P75, 100), -100)
+  # anomVals_pr_sts$MEAN <- pmax(pmin(anomVals_pr_sts$MEAN, 30), -30)
+  # anomVals_pr_sts$P25  <- pmax(pmin(anomVals_pr_sts$P25, 30), -50)
+  # anomVals_pr_sts$P75  <- pmax(pmin(anomVals_pr_sts$P75, 50), -50)
   
   anomVals_pr_sts$ZONE <- ctrList
 
@@ -86,11 +87,11 @@ for(ssp in sspLs){
     scale_fill_manual("", values="royalblue4") +
     scale_x_continuous(breaks = seq(2050, 2070, 20), ) +
     theme(legend.position="none") +
-    ylim(-100, 100) + 
+    ylim(-40, 40) + 
     facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (%)")
   
-  tiff(PlotP, width=600, height=1200, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=1200, height=600, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   
@@ -119,6 +120,9 @@ for(ssp in sspLs){
   anomVals_tm_sts$P25 = as.numeric(anomVals_tm_sts$P25)
   anomVals_tm_sts$P75 = as.numeric(anomVals_tm_sts$P75)
   anomVals_tm_sts$PERIOD = as.numeric(anomVals_tm_sts$PERIOD)
+  
+  # anomVals_tm_sts$MEAN <- (anomVals_tm_sts$P25 + anomVals_tm_sts$P75) / 2
+  
   anomVals_tm_sts$ZONE <- ctrList
 
   
@@ -140,7 +144,7 @@ for(ssp in sspLs){
     facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (C)")
   
-  tiff(PlotP, width=600, height=1200, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=1200, height=600, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   

@@ -107,7 +107,7 @@ theEntireProcess <- function(spID, OSys, inputDir, inCurClimDir, inProjClimDir, 
 				# system(paste("java", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=25", "nowarnings", "-a", "-z"), wait=TRUE)
 				
 				# For outputs in asc format uncomment the folliwing line
-				cat(paste("C:/Program Files/Java/jdk1.8.0_45/bin/java.exe", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=5", "replicatetype=crossvalidate", "nowarnings", "-a", "-z", "-j", inCurClimDir))
+				# cat(paste("C:/Program Files/Java/jdk1.8.0_45/bin/java.exe", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=5", "replicatetype=crossvalidate", "nowarnings", "-a", "-z", "-j", inCurClimDir))
 				#system(paste("C:/Program Files/Java/jdk1.8.0_45/bin/java.exe", "-mx512m", "-jar", maxentApp, "-s", outFileName, "-e", backFileSwd, "-o", paste(outName, "/crossval", sep=""), "-P", "replicates=25", "replicatetype=crossvalidate", "nowarnings", "-a", "-z", "-j", inCurClimDir), wait=TRUE)
 				# for new maxent version
 				system(
@@ -197,7 +197,7 @@ theEntireProcess <- function(spID, OSys, inputDir, inCurClimDir, inProjClimDir, 
 							  "-a",
 							  "-z"
 							)
-							cat(cmd)
+							# cat(cmd)
 							system(cmd, wait = TRUE)
 							
 							if (file.exists(paste(outGrid, ".asc", sep=""))) {

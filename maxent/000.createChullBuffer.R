@@ -6,7 +6,7 @@ require(geosphere)
 
 source("000.zipWrite.R")
 
-chullBuffer <- function(inDir, occFile, outFolder, buffDist) {
+chullBuffer <- function(inDir, occFile, outFolder, buffDist, country) {
   
   
   
@@ -108,7 +108,7 @@ chullBuffer <- function(inDir, occFile, outFolder, buffDist) {
   
   
   
-  msk <- raster(file.path(inDir, "masks", "mask.asc"))
+  msk <- raster(file.path(inDir, "masks", paste0(country, "_mask.asc")))
   
   
   

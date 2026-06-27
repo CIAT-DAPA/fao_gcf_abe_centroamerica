@@ -367,8 +367,11 @@ for (ssp in sspList) {
 }
 
 
+
+
 #########################################
 ### Ensemble por SSP para los índices ###
+### Eliminando filas incompletas antes ###
 #########################################
 
 index_cols_monthly <- c(
@@ -413,11 +416,41 @@ index_cols_annual <- c(
   "max_wet_spell"
 )
 
+read_and_clean_indices <- function(files, index_cols) {
+  
+  files <- files[file.exists(files)]
+  
+  if (length(files) == 0) {
+    warning("No se encontraron archivos para ensemble.")
+    return(NULL)
+  }
+  
+  dt <- rbindlist(lapply(files, fread), fill = TRUE)
+  
+  n_before <- nrow(dt)
+  
+  # Eliminar filas incompletas en las columnas usadas para el ensemble
+  dt <- dt[complete.cases(dt[, ..index_cols])]
+  
+  n_after <- nrow(dt)
+  
+  message("Filas originales: ", n_before)
+  message("Filas después de eliminar incompletas: ", n_after)
+  message("Filas eliminadas: ", n_before - n_after)
+  
+  if (nrow(dt) == 0) {
+    warning("Después de eliminar filas incompletas no quedan datos válidos.")
+    return(NULL)
+  }
+  
+  dt
+}
+
 ensemble_stats <- function(dt, group_cols, index_cols) {
   
   dt <- as.data.table(dt)
   
-  dt[, lapply(.SD, function(x) mean(x, na.rm = TRUE)),
+  dt[, lapply(.SD, mean, na.rm = TRUE),
      by = group_cols,
      .SDcols = index_cols]
 }
@@ -426,111 +459,415 @@ for (ssp in sspList) {
   
   message("Calculando ensemble: ", ssp)
   
+  #######################################
   # Corregimiento mensual
+  #######################################
+  
   files_correg_mon <- file.path(
     oDir,
     paste0("indices_", ssp, "_", modelList, "_2026_2080_corregimiento_mon.csv")
   )
   
-  dt_correg_mon <- rbindlist(
-    lapply(files_correg_mon[file.exists(files_correg_mon)], fread),
-    fill = TRUE
-  )
+  dt_correg_mon <- read_and_clean_indices(files_correg_mon, index_cols_monthly)
   
-  ens_correg_mon <- ensemble_stats(
-    dt_correg_mon,
-    group_cols = c("SSP", "Provincia", "Distrito", "Corregimiento", "year", "month"),
-    index_cols = index_cols_monthly
-  )
+  if (!is.null(dt_correg_mon)) {
+    
+    ens_correg_mon <- ensemble_stats(
+      dt_correg_mon,
+      group_cols = c("SSP", "Provincia", "Distrito", "Corregimiento", "year", "month"),
+      index_cols = index_cols_monthly
+    )
+    
+    ens_correg_mon[, Model := "ensemble"]
+    setcolorder(
+      ens_correg_mon,
+      c("SSP", "Model", "Provincia", "Distrito", "Corregimiento", "year", "month")
+    )
+    
+    fwrite(
+      ens_correg_mon,
+      file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_mon.csv"))
+    )
+  }
   
-  ens_correg_mon[, Model := "ensemble"]
-  setcolorder(ens_correg_mon, c("SSP", "Model", "Provincia", "Distrito", "Corregimiento", "year", "month"))
   
-  fwrite(
-    ens_correg_mon,
-    file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_mon.csv"))
-  )
-  
-  
+  #######################################
   # Corregimiento anual
+  #######################################
+  
   files_correg_ann <- file.path(
     oDir,
     paste0("indices_", ssp, "_", modelList, "_2026_2080_corregimiento_ann.csv")
   )
   
-  dt_correg_ann <- rbindlist(
-    lapply(files_correg_ann[file.exists(files_correg_ann)], fread),
-    fill = TRUE
-  )
+  dt_correg_ann <- read_and_clean_indices(files_correg_ann, index_cols_annual)
   
-  ens_correg_ann <- ensemble_stats(
-    dt_correg_ann,
-    group_cols = c("SSP", "Provincia", "Distrito", "Corregimiento", "year"),
-    index_cols = index_cols_annual
-  )
+  if (!is.null(dt_correg_ann)) {
+    
+    ens_correg_ann <- ensemble_stats(
+      dt_correg_ann,
+      group_cols = c("SSP", "Provincia", "Distrito", "Corregimiento", "year"),
+      index_cols = index_cols_annual
+    )
+    
+    ens_correg_ann[, Model := "ensemble"]
+    setcolorder(
+      ens_correg_ann,
+      c("SSP", "Model", "Provincia", "Distrito", "Corregimiento", "year")
+    )
+    
+    fwrite(
+      ens_correg_ann,
+      file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_ann.csv"))
+    )
+  }
   
-  ens_correg_ann[, Model := "ensemble"]
-  setcolorder(ens_correg_ann, c("SSP", "Model", "Provincia", "Distrito", "Corregimiento", "year"))
   
-  fwrite(
-    ens_correg_ann,
-    file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_ann.csv"))
-  )
-  
-  
+  #######################################
   # Distrito mensual
+  #######################################
+  
   files_dist_mon <- file.path(
     oDir,
     paste0("indices_", ssp, "_", modelList, "_2026_2080_distrito_mon.csv")
   )
   
-  dt_dist_mon <- rbindlist(
-    lapply(files_dist_mon[file.exists(files_dist_mon)], fread),
-    fill = TRUE
-  )
+  dt_dist_mon <- read_and_clean_indices(files_dist_mon, index_cols_monthly)
   
-  ens_dist_mon <- ensemble_stats(
-    dt_dist_mon,
-    group_cols = c("SSP", "Provincia", "Distrito", "year", "month"),
-    index_cols = index_cols_monthly
-  )
+  if (!is.null(dt_dist_mon)) {
+    
+    ens_dist_mon <- ensemble_stats(
+      dt_dist_mon,
+      group_cols = c("SSP", "Provincia", "Distrito", "year", "month"),
+      index_cols = index_cols_monthly
+    )
+    
+    ens_dist_mon[, Model := "ensemble"]
+    setcolorder(
+      ens_dist_mon,
+      c("SSP", "Model", "Provincia", "Distrito", "year", "month")
+    )
+    
+    fwrite(
+      ens_dist_mon,
+      file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_distrito_mon.csv"))
+    )
+  }
   
-  ens_dist_mon[, Model := "ensemble"]
-  setcolorder(ens_dist_mon, c("SSP", "Model", "Provincia", "Distrito", "year", "month"))
   
-  fwrite(
-    ens_dist_mon,
-    file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_distrito_mon.csv"))
-  )
-  
-  
+  #######################################
   # Distrito anual
+  #######################################
+  
   files_dist_ann <- file.path(
     oDir,
     paste0("indices_", ssp, "_", modelList, "_2026_2080_distrito_ann.csv")
   )
   
-  dt_dist_ann <- rbindlist(
-    lapply(files_dist_ann[file.exists(files_dist_ann)], fread),
-    fill = TRUE
-  )
+  dt_dist_ann <- read_and_clean_indices(files_dist_ann, index_cols_annual)
   
-  ens_dist_ann <- ensemble_stats(
-    dt_dist_ann,
-    group_cols = c("SSP", "Provincia", "Distrito", "year"),
-    index_cols = index_cols_annual
-  )
-  
-  ens_dist_ann[, Model := "ensemble"]
-  setcolorder(ens_dist_ann, c("SSP", "Model", "Provincia", "Distrito", "year"))
-  
-  fwrite(
-    ens_dist_ann,
-    file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_distrito_ann.csv"))
-  )
+  if (!is.null(dt_dist_ann)) {
+    
+    ens_dist_ann <- ensemble_stats(
+      dt_dist_ann,
+      group_cols = c("SSP", "Provincia", "Distrito", "year"),
+      index_cols = index_cols_annual
+    )
+    
+    ens_dist_ann[, Model := "ensemble"]
+    setcolorder(
+      ens_dist_ann,
+      c("SSP", "Model", "Provincia", "Distrito", "year")
+    )
+    
+    fwrite(
+      ens_dist_ann,
+      file.path(oDir, paste0("indices_", ssp, "_ensemble_2026_2080_distrito_ann.csv"))
+    )
+  }
 }
 
 
+
+
+#########################################
+### Completar corregimientos faltantes ###
+### en archivos ensemble                ###
+#########################################
+
+fix_correg_ensemble <- function(file, time_cols, index_cols) {
+  
+  norm_key <- function(x) {
+    x <- trimws(as.character(x))
+    x <- ifelse(is.na(x), NA_character_, x)
+    x <- ifelse(grepl("^[0-9]+$", x), sub("^0+", "", x), x)
+    x <- ifelse(x == "", NA_character_, x)
+    x
+  }
+  
+  if (!file.exists(file)) {
+    warning("No existe archivo: ", file)
+    return(NULL)
+  }
+  
+  ens <- fread(file)
+  
+  if (nrow(ens) == 0) {
+    warning("Archivo vacío: ", file)
+    return(NULL)
+  }
+  
+  # Verificar que existan las columnas necesarias
+  needed_cols <- c(
+    "SSP", "Model", "Provincia", "Distrito", "Corregimiento",
+    time_cols,
+    index_cols
+  )
+  
+  missing_cols <- setdiff(needed_cols, names(ens))
+  
+  if (length(missing_cols) > 0) {
+    stop("Faltan columnas en el archivo: ", paste(missing_cols, collapse = ", "))
+  }
+  
+  # Si el archivo ya quedó totalmente vacío en índices, detener
+  if (all(sapply(ens[, ..index_cols], function(x) all(is.na(x))))) {
+    stop(
+      "El archivo ya tiene todos los índices en NA. ",
+      "Regenera/restaura el ensemble original antes de corregirlo."
+    )
+  }
+  
+  # Tabla completa de corregimientos desde maskFile / adm_lookup
+  adm_full <- unique(adm_lookup[, .(
+    Provincia,
+    Distrito,
+    Corregimiento
+  )])
+  
+  adm_full[, Provincia_key := norm_key(Provincia)]
+  adm_full[, Distrito_key := norm_key(Distrito)]
+  adm_full[, Corregimiento_key := norm_key(Corregimiento)]
+  
+  ens[, Provincia_key := norm_key(Provincia)]
+  ens[, Distrito_key := norm_key(Distrito)]
+  ens[, Corregimiento_key := norm_key(Corregimiento)]
+  
+  # Mantener nombres administrativos originales del maskFile
+  adm_full[, Provincia := as.character(Provincia)]
+  adm_full[, Distrito := as.character(Distrito)]
+  adm_full[, Corregimiento := as.character(Corregimiento)]
+  
+  ens[, Provincia := as.character(Provincia)]
+  ens[, Distrito := as.character(Distrito)]
+  ens[, Corregimiento := as.character(Corregimiento)]
+  
+  # Combinaciones temporales existentes
+  time_dt <- unique(
+    ens[, c("SSP", "Model", time_cols), with = FALSE]
+  )
+  
+  # Crear grilla completa:
+  # cada año/mes x todos los corregimientos del maskFile
+  time_dt[, tmp_join := 1]
+  adm_full[, tmp_join := 1]
+  
+  full_grid <- merge(
+    time_dt,
+    adm_full,
+    by = "tmp_join",
+    allow.cartesian = TRUE
+  )
+  
+  full_grid[, tmp_join := NULL]
+  time_dt[, tmp_join := NULL]
+  adm_full[, tmp_join := NULL]
+  
+  join_cols <- c(
+    "SSP",
+    "Model",
+    "Provincia_key",
+    "Distrito_key",
+    "Corregimiento_key",
+    time_cols
+  )
+  
+  # Datos originales por corregimiento
+  ens_values <- ens[, c(join_cols, index_cols), with = FALSE]
+  
+  # Promedio del distrito
+  dist_mean <- ens[, lapply(.SD, mean, na.rm = TRUE),
+                   by = c("SSP", "Model", "Provincia_key", "Distrito_key", time_cols),
+                   .SDcols = index_cols]
+  
+  # Promedio de la provincia
+  prov_mean <- ens[, lapply(.SD, mean, na.rm = TRUE),
+                   by = c("SSP", "Model", "Provincia_key", time_cols),
+                   .SDcols = index_cols]
+  
+  # Promedio global por SSP y tiempo
+  global_mean <- ens[, lapply(.SD, mean, na.rm = TRUE),
+                     by = c("SSP", "Model", time_cols),
+                     .SDcols = index_cols]
+  
+  # Unir valores originales
+  out <- merge(
+    full_grid,
+    ens_values,
+    by = join_cols,
+    all.x = TRUE
+  )
+  
+  # Unir respaldo distrito
+  out <- merge(
+    out,
+    dist_mean,
+    by = c("SSP", "Model", "Provincia_key", "Distrito_key", time_cols),
+    all.x = TRUE,
+    suffixes = c("", "_dist")
+  )
+  
+  # Unir respaldo provincia
+  out <- merge(
+    out,
+    prov_mean,
+    by = c("SSP", "Model", "Provincia_key", time_cols),
+    all.x = TRUE,
+    suffixes = c("", "_prov")
+  )
+  
+  # Unir respaldo global
+  out <- merge(
+    out,
+    global_mean,
+    by = c("SSP", "Model", time_cols),
+    all.x = TRUE,
+    suffixes = c("", "_global")
+  )
+  
+  # Relleno jerárquico:
+  # corregimiento original -> distrito -> provincia -> global
+  for (col in index_cols) {
+    
+    col_dist <- paste0(col, "_dist")
+    col_prov <- paste0(col, "_prov")
+    col_glob <- paste0(col, "_global")
+    
+    out[is.na(get(col)), (col) := get(col_dist)]
+    out[is.na(get(col)), (col) := get(col_prov)]
+    out[is.na(get(col)), (col) := get(col_glob)]
+  }
+  
+  # Eliminar columnas auxiliares
+  aux_cols <- c(
+    paste0(index_cols, "_dist"),
+    paste0(index_cols, "_prov"),
+    paste0(index_cols, "_global"),
+    "Provincia_key",
+    "Distrito_key",
+    "Corregimiento_key"
+  )
+  
+  aux_cols <- intersect(aux_cols, names(out))
+  out[, c(aux_cols) := NULL]
+  
+  # Orden final
+  key_cols <- c(
+    "SSP",
+    "Model",
+    "Provincia",
+    "Distrito",
+    "Corregimiento",
+    time_cols
+  )
+  
+  setcolorder(out, c(key_cols, index_cols))
+  setorder(out, Provincia, Distrito, Corregimiento, year)
+  
+  if ("month" %in% names(out)) {
+    setorder(out, Provincia, Distrito, Corregimiento, year, month)
+  }
+  
+  # Diagnóstico
+  n_original <- nrow(ens)
+  n_final <- nrow(out)
+  n_added <- n_final - n_original
+  
+  na_remaining <- sum(is.na(out[, ..index_cols]))
+  
+  message("Archivo corregido: ", basename(file))
+  message("Filas originales: ", n_original)
+  message("Filas finales: ", n_final)
+  message("Filas agregadas: ", n_added)
+  message("Valores NA restantes en índices: ", na_remaining)
+  
+  
+  # Orden final
+  if ("month" %in% names(out)) {
+    
+    setorder(
+      out,
+      year,
+      month,
+      Provincia,
+      Distrito,
+      Corregimiento
+    )
+    
+  } else {
+    
+    setorder(
+      out,
+      year,
+      Provincia,
+      Distrito,
+      Corregimiento
+    )
+    
+  }
+  
+  # Reordenar columnas
+  key_cols <- c(
+    "SSP",
+    "Model",
+    "Provincia",
+    "Distrito",
+    "Corregimiento",
+    time_cols
+  )
+  
+  setcolorder(out, c(key_cols, index_cols))
+
+  file_out <- sub("\\.csv$", "_completed.csv", file)
+  
+  fwrite(out, file_out)
+  
+  message("Archivo original conservado: ", basename(file))
+  message("Archivo corregido escrito como: ", basename(file_out))
+    
+  invisible(out)
+}
+
+for (ssp in sspList) {
+  
+  fix_correg_ensemble(
+    file = file.path(
+      oDir,
+      paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_mon.csv")
+    ),
+    time_cols = c("year", "month"),
+    index_cols = index_cols_monthly
+  )
+  
+  fix_correg_ensemble(
+    file = file.path(
+      oDir,
+      paste0("indices_", ssp, "_ensemble_2026_2080_corregimiento_ann.csv")
+    ),
+    time_cols = c("year"),
+    index_cols = index_cols_annual
+  )
+}
 
 
 #########################################

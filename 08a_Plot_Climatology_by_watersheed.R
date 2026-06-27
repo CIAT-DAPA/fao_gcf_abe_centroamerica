@@ -15,22 +15,23 @@ require(maptools)
 require(latticeExtra)
 library(terra)
 library(sf)
+library(grid)
 
 # Set params
-bDir <- "Z:/1.Data/Results/climate/01_baseline/pan/atlas_1981-2022_30s"
-oDir <- "Z:/1.Data/Results/climate/01_baseline/pan/evaluation"
+bDir <- "Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min"
+oDir <- "Z:/1.Data/Results/climate/01_baseline/dom/evaluation_watersheed"
 varList <- c("tmax", "tmin", "tmean", "prec")
-varList <- c("etp", "hurs", "rsds", "wspd") 
+# varList <- c("etp", "hurs", "rsds", "wspd") 
 id <- c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
 seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
+crs_ref <- crs(raster(paste0(bDir, "/prec_1.tif")))
 #mask <- readOGR("Z:/1.Data/Results/climate/00_admin_data/pan/Cuenca126.shp")
 #mask_adm1 <- readOGR("S:/admin_boundaries/shp_files/CRI_adm/CRI1.shp")
-crs_ref <- crs(raster(paste0(bDir, "/prec_1.tif")))
-
-mask <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Division_administrativa/Tonosi_la_Villa_corregimientos.shp"), crs_ref), "Spatial")
-mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Division_administrativa/Tonosi_la_Villa_corregimientos.shp"), crs_ref), "Spatial")
-#mask <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/pan/Cuenca126.shp"), crs_ref), "Spatial")
-#mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/pan/SubCuencas_126.shp"), crs_ref), "Spatial")
+mask <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_DOM_0.shx"), crs_ref), "Spatial")
+mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_DOM_1.shx"), crs_ref), "Spatial")
+# mask <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"), crs_ref), "Spatial")
+# mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"), crs_ref), "Spatial")
+# mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif"
 
 setwd(bDir)
 if (!file.exists(oDir)) {dir.create(oDir)}
@@ -68,28 +69,28 @@ if (!file.exists(oDir)) {dir.create(oDir)}
 #   }
 # 
 # }
-for (var in varList){  
-  
-  # Loop throught seasons
-  for (i in 1:length(seasons)){
-    
-    #baseline 
-    if (!file.exists(paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''))){
-      
-      cat("Seasonal calcs baseline \n")
-      
-      # Load averages files 
-      iAvg <- stack(paste(bDir,'/', var, "_", 1:12, ".tif",sep=''))
-      
-      if (var == "prec"){
-        sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){sum(x,na.rm=any(!is.na(x)))})
-      } else {
-        sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){mean(x,na.rm=T)})
-      }
-      writeRaster(sAvg, paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''),format="GTiff", overwrite=T)
-    }
-  }
-}
+# for (var in varList){  
+#   
+#   # Loop throught seasons
+#   for (i in 1:length(seasons)){
+#     
+#     #baseline 
+#     if (!file.exists(paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''))){
+#       
+#       cat("Seasonal calcs baseline \n")
+#       
+#       # Load averages files 
+#       iAvg <- stack(paste(bDir,'/', var, "_", 1:12, ".tif",sep=''))
+#       
+#       if (var == "prec"){
+#         sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){sum(x,na.rm=any(!is.na(x)))})
+#       } else {
+#         sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){mean(x,na.rm=T)})
+#       }
+#       writeRaster(sAvg, paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''),format="GTiff", overwrite=T)
+#     }
+#   }
+# }
 
 #############################
 #### 01 Plots by months #####
@@ -98,7 +99,8 @@ for (var in varList){
 for (var in varList){
   
   stk_crop <- stack(paste0(bDir, "/", var, "_", 1:12, ".tif"))
-  stk_crop <- mask(crop(stk_crop, extent(mask)), mask)
+  # stk_crop <- resample(stk_crop, raster(mask_rs), method="bilinear")
+  stk_crop <- mask(crop(stk_crop, extent(mask)))
 
   if (var == "prec"){
     
@@ -181,9 +183,9 @@ for (var in varList){
   myTheme$axis.line$col = 'white' # Eliminate frame from maps
   
   # Save to file
-  tiff(paste(oDir, "/plot_monthly_clim_", var, ".tif", sep=""), width=1600, height=800, pointsize=8, compression='lzw',res=200)
+  tiff(paste(oDir, "/plot_monthly_clim_", var, ".tif", sep=""), width=2000, height=1200, pointsize=8, compression='lzw',res=200)
   
-  print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(6, 2), xlab="", ylab="", par.settings = myTheme, 
+  print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
                   colorkey = list(space = "bottom", width=1.2, height=1)
                   ) 
         + layer(sp.polygons(mask_adm1, lwd=0.8))
@@ -198,13 +200,6 @@ for (var in varList){
 #### 02 Plots by seasons ####
 #############################
 
-# Load libraries
-require(raster)
-require(rasterVis)
-require(maptools)
-require(rgdal)
-library(grid)
-
 # Set params
 id <- c("djf", "mam", "jja", "son", "ann") ##if annual, include 5x1 plots in levelplot and increase width
 id_mod <-c("DEF", "MAM", "JJA", "SON", "ANUAL")
@@ -212,7 +207,8 @@ id_mod <-c("DEF", "MAM", "JJA", "SON", "ANUAL")
 for (var in varList){
   
   stk_crop <- stack(paste0(bDir, "/", var, "_", id, ".tif"))
-  stk_crop <- mask(crop(stk_crop, extent(mask)), mask)
+  # stk_crop <- resample(stk_crop, raster(mask_rs), method="bilinear")
+  stk_crop <- mask(crop(stk_crop, extent(mask)))
   
   if (var == "prec"){
     
@@ -293,7 +289,7 @@ for (var in varList){
   myTheme$strip.border$col = "white" # Eliminate frame from maps
   myTheme$axis.line$col = 'white' # Eliminate frame from maps
     
-  tiff(paste(oDir, "/plot_seasonal_clim_", var, "_v2.tif", sep=""), width=1600, height=600, pointsize=8, compression='lzw',res=200)
+  tiff(paste(oDir, "/plot_seasonal_clim_", var, "_v2.tif", sep=""), width=2400, height=800, pointsize=8, compression='lzw',res=200)
   
   print(levelplot(plot, at = zvalues, 
                   scales = list(draw=FALSE), 

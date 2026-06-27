@@ -35,7 +35,7 @@ metrics <- c("avg") #, "q25", "q75")
 
 if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}
 
-for (ssp in sspList) {
+for (ssp in sspList){
   
   for (per in perList){
     

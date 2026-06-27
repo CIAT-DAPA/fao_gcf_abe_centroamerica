@@ -17,10 +17,9 @@ library(terra)
 
 # Set params
 inputDir <- "Z:/1.Data/Results/climate/04_species"
-#spID <- "cedrela_montana"
 outFolder <- paste(inputDir, "/mxe_outputs", sep="")
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/pan/atlas_1981-2022_30s/prec_1.tif"))
-mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Division_administrativa/Tonosi_la_Villa_corregimientos.shp"), crs_ref), "Spatial")
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/02_climate_change/dom_2_5min_anom_ens/ssp_245/2050s/prec_1_avg.tif"))
+mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"), crs_ref), "Spatial")
 mask_adm2 <- mask_adm1
 projectionList <- c("ssp_245/2050s","ssp_245/2070s","ssp_585/2050s", "ssp_585/2070s")
 id <- c("2050 SSP2-4.5", "2050s SSP5-8.5",
@@ -29,19 +28,17 @@ id <- c("2050 SSP2-4.5", "2050s SSP5-8.5",
 sspLsMod <- c("SSP2-4.5", "SSP5-8.5")
 yearLs <- c("2050s", "2070s")
 projectionList <- gsub("/", "_", projectionList)
-suffix <- "atlas_1981-2022_30s"
+suffix <- "wcl_v21_2_5min"
 oDir <- paste0(outFolder, "/_plots")
 if (!file.exists(oDir)) {dir.create(oDir)}
 
 speciesList <- c(
-  "alouatta_palliata",
-  "ateles_geoffroyi",
-  "ara_macao",
-  "anacardium_excelsum",
-  # "dalbergia_retusa",
-  "dendrobates_auratus",
-  # "leopardus_pardalis",
-  "rhizophora_mangle"
+  "amazona_ventralis",
+  "cyclura_cornuta",
+  "juniperus_gracilior",
+  "leuenbergeria_quisqueyana",
+  "magnolia_pallescens",
+  "solenodon_paradoxus"
 )
 
 for(spID in speciesList){

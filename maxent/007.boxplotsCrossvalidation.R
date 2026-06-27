@@ -2,8 +2,15 @@
 ###Cross Validation Performance####
 ###############AUC#################
 ###################################
-inputDir <- "Y:/1.Data/RAW/Species"
-#spID <- "cedrela_montana"
+inputDir <- "Z:/1.Data/Results/climate/04_species"
+speciesList <- c(
+  "amazona_ventralis",
+  "cyclura_cornuta",
+  "juniperus_gracilior",
+  "leuenbergeria_quisqueyana",
+  "magnolia_pallescens",
+  "solenodon_paradoxus"
+)
 outFolder <- paste(inputDir, "/mxe_outputs", sep="")
 oDir <- paste0(outFolder, "/_plots")
 

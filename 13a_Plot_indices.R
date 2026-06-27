@@ -3,13 +3,13 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_indices"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_indices_v2"
 plotDir <- file.path(oDir, "plots_cuenca_gcm_shading")
 dir.create(plotDir, recursive = TRUE, showWarnings = FALSE)
 
-sspList <- c("ssp126", "ssp245", "ssp370", "ssp585")
+sspList <- c("ssp245", "ssp585")
 modelList <- c("ACCESS-ESM1-5", "EC-Earth3", "INM-CM5-0", "MPI-ESM1-2-HR", "MRI-ESM2-0")
-region <- "Cuenca Tonosí-La Villa"
+region <- "Guayubin-Mao"
 
 index_labels <- c(
   annual_prec = "Precipitación anual (mm/año)",
@@ -121,9 +121,9 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/pan_indices"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_indices_v2"
 sspList <- c("ssp245", "ssp585")
-region <- "Tonosí-La Villa"
+region <- "Guayubin-Mao"
 
 # Leer archivos anuales ensemble por distrito
 all_indices <- list()
