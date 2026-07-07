@@ -44,11 +44,32 @@ holdridge_classes <- c(
   "Bosque húmedo montano",
   "Bosque muy húmedo montano",
   "Páramo",
-  "Superpáramo / zonas muy frías"
+  "Superpáramo / zonas muy frías",
+  "Tropical muy seco / árido",
+  "Premontano muy seco / árido",
+  "Montano bajo seco / muy seco",
+  "Montano seco / muy seco",
+  "Páramo seco",
+  "No clasificado"
 )
 
-hold_cols <- colorRampPalette(brewer.pal(12, "Paired"))(12)
-zvalues <- seq(0.5, 12.5, 1)
+# IDs originales
+hold_ids <- c(1:17, 99)
+
+# IDs para graficar: 99 se convierte temporalmente a 18
+plot_ids <- 1:18
+
+hold_cols <- colorRampPalette(brewer.pal(12, "Paired"))(18)
+hold_cols[18] <- "grey80"
+
+zvalues <- seq(0.5, 18.5, 1)
+
+hold_legend <- data.frame(
+  ID_original = hold_ids,
+  ID_plot = plot_ids,
+  Clase = holdridge_classes,
+  Color = hold_cols
+)
 
 # ============================================================
 # Theme
@@ -58,6 +79,16 @@ myTheme <- rasterTheme(region = hold_cols)
 myTheme$strip.border$col <- "white"
 myTheme$axis.line$col <- "white"
 myTheme$background$col <- "white"
+
+# ============================================================
+# Function: recode 99 to 18 only for plotting
+# ============================================================
+
+prep_plot_holdridge <- function(r) {
+  r_plot <- r
+  r_plot[r_plot == 99] <- 18
+  return(r_plot)
+}
 
 # ============================================================
 # Function crop + mask + reprojection of polygons
@@ -88,8 +119,10 @@ prep_map <- function(r) {
 # ============================================================
 
 hz_base_raw <- raster(file.path(ecoDir, "holdridge_1981_2022.tif"))
+
 mp_base <- prep_map(hz_base_raw)
 hz_base <- mp_base$raster
+hz_base_plot <- prep_plot_holdridge(hz_base)
 
 oPlot <- file.path(figDir, "map_holdridge_actual_tlv.tif")
 
@@ -104,7 +137,7 @@ tiff(
 
 print(
   levelplot(
-    hz_base,
+    hz_base_plot,
     at = zvalues,
     scales = list(draw = FALSE),
     xlab = "",
@@ -116,7 +149,7 @@ print(
       width = 1.2,
       height = 1,
       labels = list(
-        at = 1:12,
+        at = plot_ids,
         labels = holdridge_classes,
         cex = 0.55
       )
@@ -134,6 +167,7 @@ dev.off()
 
 future_list <- list()
 future_names <- c()
+mp_future_ref <- NULL
 
 for (per in perList) {
   
@@ -149,16 +183,19 @@ for (per in perList) {
     r <- raster(f)
     mp <- prep_map(r)
     
-    future_list[[paste0(ssp, "_", per)]] <- mp$raster
+    r_plot <- prep_plot_holdridge(mp$raster)
+    
+    future_list[[paste0(ssp, "_", per)]] <- r_plot
     future_names <- c(future_names, paste0(toupper(ssp), " - ", per))
+    
+    if (is.null(mp_future_ref)) {
+      mp_future_ref <- mp
+    }
   }
 }
 
 future_stack <- stack(future_list)
 names(future_stack) <- future_names
-
-# Usar polígonos reproyectados al CRS del primer mapa futuro
-mp_future_ref <- prep_map(raster(file.path(ecoDir, paste0("holdridge_", sspList[1], "_", perList[1], ".tif"))))
 
 oPlot <- file.path(figDir, "map_holdridge_futuro_tlv.tif")
 
@@ -187,7 +224,7 @@ print(
       width = 1.2,
       height = 1,
       labels = list(
-        at = 1:12,
+        at = plot_ids,
         labels = holdridge_classes,
         cex = 0.55
       )
@@ -221,11 +258,18 @@ for (per in perList) {
     mp_fut <- prep_map(fut)
     fut_clip <- mp_fut$raster
     
-    chg <- fut_clip
+    # Asegurar que futuro y baseline tengan misma geometría
+    if (!compareRaster(hz_base, fut_clip, extent = TRUE, rowcol = TRUE, crs = TRUE, res = TRUE, stopiffalse = FALSE)) {
+      fut_clip <- resample(fut_clip, hz_base, method = "ngb")
+    }
+    
+    chg <- hz_base
     chg[] <- NA
     
-    chg[!is.na(hz_base[]) & !is.na(fut_clip[]) & hz_base[] == fut_clip[]] <- 0
-    chg[!is.na(hz_base[]) & !is.na(fut_clip[]) & hz_base[] != fut_clip[]] <- 1
+    valid <- !is.na(hz_base[]) & !is.na(fut_clip[])
+    
+    chg[valid & hz_base[] == fut_clip[]] <- 0
+    chg[valid & hz_base[] != fut_clip[]] <- 1
     
     change_list[[paste0(ssp, "_", per)]] <- chg
     change_names <- c(change_names, paste0(toupper(ssp), " - ", per))
@@ -273,8 +317,9 @@ print(
       )
     )
   ) +
-    layer(sp.polygons(mp_future_ref$correg, lwd = 0.35, col = "gray30")) +
-    layer(sp.polygons(mp_future_ref$cuenca, lwd = 1.2, col = "black"))
+    layer(sp.polygons(mp_base$correg, lwd = 0.35, col = "gray30")) +
+    layer(sp.polygons(mp_base$cuenca, lwd = 1.2, col = "black"))
 )
 
 dev.off()
+

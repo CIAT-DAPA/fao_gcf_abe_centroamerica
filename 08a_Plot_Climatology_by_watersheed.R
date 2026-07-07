@@ -13,13 +13,14 @@ require(rgdal)
 require(raster)
 require(maptools)
 require(latticeExtra)
+library(lattice)
 library(terra)
 library(sf)
 library(grid)
 
 # Set params
-bDir <- "Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min"
-oDir <- "Z:/1.Data/Results/climate/01_baseline/dom/evaluation_watersheed"
+bDir <- "Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s"
+oDir <- "Z:/1.Data/Results/climate/01_baseline/cri/evaluation_watersheed"
 varList <- c("tmax", "tmin", "tmean", "prec")
 # varList <- c("etp", "hurs", "rsds", "wspd") 
 id <- c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
@@ -27,8 +28,8 @@ seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
 crs_ref <- crs(raster(paste0(bDir, "/prec_1.tif")))
 #mask <- readOGR("Z:/1.Data/Results/climate/00_admin_data/pan/Cuenca126.shp")
 #mask_adm1 <- readOGR("S:/admin_boundaries/shp_files/CRI_adm/CRI1.shp")
-mask <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_DOM_0.shx"), crs_ref), "Spatial")
-mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_DOM_1.shx"), crs_ref), "Spatial")
+mask <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"), crs_ref), "Spatial")
+mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"), crs_ref), "Spatial")
 # mask <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"), crs_ref), "Spatial")
 # mask_adm1 <- as(project(vect("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"), crs_ref), "Spatial")
 # mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif"
@@ -100,7 +101,7 @@ for (var in varList){
   
   stk_crop <- stack(paste0(bDir, "/", var, "_", 1:12, ".tif"))
   # stk_crop <- resample(stk_crop, raster(mask_rs), method="bilinear")
-  stk_crop <- mask(crop(stk_crop, extent(mask)))
+  stk_crop <- mask(crop(stk_crop, extent(mask)), mask)
 
   if (var == "prec"){
     
@@ -183,12 +184,12 @@ for (var in varList){
   myTheme$axis.line$col = 'white' # Eliminate frame from maps
   
   # Save to file
-  tiff(paste(oDir, "/plot_monthly_clim_", var, ".tif", sep=""), width=2000, height=1200, pointsize=8, compression='lzw',res=200)
+  tiff(paste(oDir, "/plot_monthly_clim_", var, ".tif", sep=""), width=1200, height=1600, pointsize=8, compression='lzw',res=200)
   
   print(levelplot(plot, at = zvalues, scales = list(draw=FALSE), layout=c(4, 3), xlab="", ylab="", par.settings = myTheme, 
                   colorkey = list(space = "bottom", width=1.2, height=1)
                   ) 
-        + layer(sp.polygons(mask_adm1, lwd=0.8))
+        + latticeExtra::layer(sp.polygons(mask_adm1, lwd=0.8))
         )
   
   dev.off()
@@ -208,16 +209,16 @@ for (var in varList){
   
   stk_crop <- stack(paste0(bDir, "/", var, "_", id, ".tif"))
   # stk_crop <- resample(stk_crop, raster(mask_rs), method="bilinear")
-  stk_crop <- mask(crop(stk_crop, extent(mask)))
+  stk_crop <- mask(crop(stk_crop, extent(mask)), mask)
   
   if (var == "prec"){
     
-    stk_crop[which(stk_crop[]>2400)]=2400
+    stk_crop[which(stk_crop[]>2500)]=2500
     
     plot <- setZ(stk_crop, id_mod)
     names(plot) <- toupper(id_mod)
     
-    zvalues <- seq(0, 2400, 100) # Define limits
+    zvalues <- seq(0, 2500, 100) # Define limits
     myTheme <- BuRdTheme() # Define squeme of colors
     myTheme$regions$col=colorRampPalette(c("khaki1", "skyblue1", "blue", "darkblue", "darkmagenta"))(length(zvalues)-1) # Set new colors
     # myTheme=rasterTheme(region=brewer.pal('Blues', n=9))
@@ -289,7 +290,7 @@ for (var in varList){
   myTheme$strip.border$col = "white" # Eliminate frame from maps
   myTheme$axis.line$col = 'white' # Eliminate frame from maps
     
-  tiff(paste(oDir, "/plot_seasonal_clim_", var, "_v2.tif", sep=""), width=2400, height=800, pointsize=8, compression='lzw',res=200)
+  tiff(paste(oDir, "/plot_seasonal_clim_", var, "_v2.tif", sep=""), width=2400, height=1000, pointsize=8, compression='lzw',res=200)
   
   print(levelplot(plot, at = zvalues, 
                   scales = list(draw=FALSE), 
@@ -300,7 +301,7 @@ for (var in varList){
                   par.settings = myTheme,
                   # margin=F,
                   colorkey = list(space = "bottom", width=1.2, height=1, labels=list(cex=1)))
-        + layer(sp.polygons(mask_adm1, lwd=0.8))
+        + latticeExtra::layer(sp.polygons(mask_adm1, lwd=0.8))
         )
    
   
@@ -395,7 +396,7 @@ for (var in varList){
                   par.settings = myTheme, 
                   margin=F,
                   colorkey = list(space = "bottom", width=1.2, height=1, labels=list(cex=1.2)))
-        + layer(sp.polygons(mask, lwd=0.8))
+        + latticeExtra::layer(sp.polygons(mask, lwd=0.8))
   )
   
   dev.off()

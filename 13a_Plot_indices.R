@@ -3,13 +3,13 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_indices_v2"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/cri_indices"
 plotDir <- file.path(oDir, "plots_cuenca_gcm_shading")
 dir.create(plotDir, recursive = TRUE, showWarnings = FALSE)
 
 sspList <- c("ssp245", "ssp585")
 modelList <- c("ACCESS-ESM1-5", "EC-Earth3", "INM-CM5-0", "MPI-ESM1-2-HR", "MRI-ESM2-0")
-region <- "Guayubin-Mao"
+region <- "Tempisque"
 
 index_labels <- c(
   annual_prec = "Precipitación anual (mm/año)",

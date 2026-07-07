@@ -15,20 +15,20 @@ inputDir <- "Z:/1.Data/Results/climate/04_species"
 iDir <- "Z:/1.Data/Results/climate/04_species/occurrence_files"
 iDir_back <- "Z:/1.Data/Results/climate/04_species/background_selection"
 NADir <- "Z:/1.Data/Results/climate/04_species/native-areas/asciigrid"
-dem_file <- "Z:/1.Data/Results/climate/04_species/masks/dom_dem.tif"
-bio_dir  <- "Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min"  
+dem_file <- "Z:/1.Data/Results/climate/04_species/masks/hnd_dem.tif"
+bio_dir  <- "Z:/1.Data/Results/climate/01_baseline/hnd/average_v2"  
 backFilesDir <- "Z:/1.Data/Results/climate/04_species/background_selection"
-msk <- "Z:/1.Data/Results/climate/04_species/masks/dom_mask.asc"
-country <- "dom"
+msk <- "Z:/1.Data/Results/climate/04_species/masks/hnd_mask.asc"
+country <- "hnd"
 
 #specie = "ceroxylon_quindiuense" 
 speciesList <- c(
-  "amazona_ventralis",
-  "cyclura_cornuta",
-  "juniperus_gracilior",
-  "leuenbergeria_quisqueyana",
-  "magnolia_pallescens",
-  "solenodon_paradoxus"
+  "alouatta_palliata",
+  "amazona_autumnalis",
+  "ceiba_pentandra",
+  "enterolobium_cyclocarpum",
+  "liquidambar_styraciflua",
+  "pharomachrus_mocinno"
 )
 buffDist <- 50000
 
@@ -82,7 +82,7 @@ for(specie in speciesList){
   # -----------------------------
   bio_files <- list.files(
     bio_dir,
-    pattern = "^bio_[0-9]+\\.tif$",
+    pattern = "^bio_[0-9]+\\.asc$",
     full.names = TRUE
   )
   bio_stack <- stack(bio_files)

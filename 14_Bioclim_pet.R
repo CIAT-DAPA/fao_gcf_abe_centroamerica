@@ -55,17 +55,17 @@ bioclim_calc <- function(bDir, ext, suffix){
   
 }
 
-bDir <- "Z:/1.Data/Results/climate/01_baseline/pan/atlas_1981-2022_30s"
-ext <- "tif"
+bDir <- "Z:/1.Data/Results/climate/01_baseline/hnd/average_v2"
+ext <- "asc"
 suffix <- ""
 otp <- bioclim_calc(bDir, ext, suffix)
 
 ####################
 #### 02 Future  ####
 ####################
-downdir <- "Z:/1.Data/Results/climate/02_climate_change/pan_30s_ens"
+downdir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_30s_ens"
 sspList   <- c("ssp_245", "ssp_585")
-perList <- c("2050s", "2070s", "2090s") 
+perList <- c("2050s", "2070s") 
 ext <- "tif"
 suffix <- "_avg"
 

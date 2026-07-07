@@ -8,8 +8,8 @@ library(ggplot2)
 
 # Directorios
 bslDir <- "X:/Climate change scenarios/CMIP6_LATAM"
-oDir   <- "Z:/1.Data/Results/climate/02_climate_change/dom_indices_v2"
-tmpDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_daily_v2"
+oDir   <- "Z:/1.Data/Results/climate/02_climate_change/cri_indices"
+tmpDir <- "Z:/1.Data/Results/climate/02_climate_change/cri_daily"
 
 dir.create(oDir, recursive = TRUE, showWarnings = FALSE)
 dir.create(tmpDir, recursive = TRUE, showWarnings = FALSE)
@@ -17,11 +17,11 @@ dir.create(tmpDir, recursive = TRUE, showWarnings = FALSE)
 # Parámetros
 varList   <- c("pr", "hurs", "rsds", "sfcWind", "tasmax", "tasmin")
 # sspList   <- c("ssp126", "ssp245", "ssp370", "ssp585")
-sspList   <- c("ssp585")
-modelList <- c("MPI-ESM1-2-HR", "MRI-ESM2-0")
+sspList   <- c("ssp245")
+modelList <- c("ACCESS-ESM1-5", "EC-Earth3", "INM-CM5-0", "MPI-ESM1-2-HR", "MRI-ESM2-0")
 years     <- 2026:2080
 
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
 
 ref_file <- list.files(
   file.path(bslDir, "pr", sspList[1], modelList[1]),
@@ -37,9 +37,9 @@ mask_adm1$ZONE_ID <- 1:nrow(mask_adm1)
 
 adm_lookup <- data.table(
   ZONE_ID = mask_adm1$ZONE_ID,
-  Provincia = mask_adm1$PROV,
-  Distrito = mask_adm1$MUN,
-  Corregimiento = mask_adm1$CODIGO
+  Provincia = mask_adm1$PROVINCIA,
+  Distrito = mask_adm1$DISTRITO,
+  Corregimiento = mask_adm1$CÓDIGO_DT
 )
 
 

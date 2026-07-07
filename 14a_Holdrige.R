@@ -22,6 +22,54 @@ dir.create(outDir, recursive = TRUE, showWarnings = FALSE)
 # Holdridge classification function
 # ============================================================
 
+# holdridge_class <- function(tbio, pann, pet_ratio) {
+# 
+#   out <- tbio
+#   out[] <- NA
+# 
+#   # -----------------------------
+#   # Tropical / premontane / montane belts by biotemperature
+#   # -----------------------------
+# 
+#   # Bosque seco tropical
+#   out[tbio >= 24 & pann >= 500 & pann < 2000 & pet_ratio >= 1 & pet_ratio < 2] <- 1
+# 
+#   # Bosque húmedo tropical
+#   out[tbio >= 24 & pann >= 2000 & pann < 4000 & pet_ratio >= 0.5 & pet_ratio < 1] <- 2
+# 
+#   # Bosque muy húmedo tropical
+#   out[tbio >= 24 & pann >= 4000 & pet_ratio < 0.5] <- 3
+# 
+#   # Bosque seco premontano
+#   out[tbio >= 18 & tbio < 24 & pann >= 500 & pann < 2000 & pet_ratio >= 1 & pet_ratio < 2] <- 4
+# 
+#   # Bosque húmedo premontano
+#   out[tbio >= 18 & tbio < 24 & pann >= 1000 & pann < 4000 & pet_ratio >= 0.5 & pet_ratio < 1] <- 5
+# 
+#   # Bosque muy húmedo premontano
+#   out[tbio >= 18 & tbio < 24 & pann >= 2000 & pet_ratio < 0.5] <- 6
+# 
+#   # Bosque húmedo montano bajo
+#   out[tbio >= 12 & tbio < 18 & pann >= 1000 & pann < 4000] <- 7
+# 
+#   # Bosque muy húmedo montano bajo
+#   out[tbio >= 12 & tbio < 18 & pann >= 2000 & pet_ratio < 0.5] <- 8
+# 
+#   # Bosque húmedo montano
+#   out[tbio >= 6 & tbio < 12 & pann >= 500 & pann < 3000] <- 9
+# 
+#   # Bosque muy húmedo montano
+#   out[tbio >= 6 & tbio < 12 & pann >= 2000] <- 10
+# 
+#   # Páramo
+#   out[tbio >= 3 & tbio < 6 & pann >= 500] <- 11
+# 
+#   # Superpáramo / zonas muy frías
+#   out[tbio < 3] <- 12
+# 
+#   return(out)
+# }
+
 holdridge_class <- function(tbio, pann, pet_ratio) {
   
   out <- tbio
@@ -31,41 +79,55 @@ holdridge_class <- function(tbio, pann, pet_ratio) {
   # Tropical / premontane / montane belts by biotemperature
   # -----------------------------
   
-  # Bosque seco tropical
+  # 1. Tropical: tbio >= 24
+  out[tbio >= 24 & pann < 500] <- 13                              # Tropical muy seco / árido
+  out[tbio >= 24 & pann >= 500 & pann < 2000 & pet_ratio >= 2] <- 13
   out[tbio >= 24 & pann >= 500 & pann < 2000 & pet_ratio >= 1 & pet_ratio < 2] <- 1
+  out[tbio >= 24 & pann >= 500 & pann < 2000 & pet_ratio < 1] <- 2
   
-  # Bosque húmedo tropical
+  out[tbio >= 24 & pann >= 2000 & pann < 4000 & pet_ratio >= 1] <- 1
   out[tbio >= 24 & pann >= 2000 & pann < 4000 & pet_ratio >= 0.5 & pet_ratio < 1] <- 2
+  out[tbio >= 24 & pann >= 2000 & pann < 4000 & pet_ratio < 0.5] <- 3
   
-  # Bosque muy húmedo tropical
+  out[tbio >= 24 & pann >= 4000 & pet_ratio >= 0.5] <- 2
   out[tbio >= 24 & pann >= 4000 & pet_ratio < 0.5] <- 3
   
-  # Bosque seco premontano
+  # 2. Premontano: 18 <= tbio < 24
+  out[tbio >= 18 & tbio < 24 & pann < 500] <- 14                  # Premontano muy seco / árido
+  out[tbio >= 18 & tbio < 24 & pann >= 500 & pann < 1000 & pet_ratio >= 2] <- 14
   out[tbio >= 18 & tbio < 24 & pann >= 500 & pann < 2000 & pet_ratio >= 1 & pet_ratio < 2] <- 4
+  out[tbio >= 18 & tbio < 24 & pann >= 500 & pann < 1000 & pet_ratio < 1] <- 5
   
-  # Bosque húmedo premontano
+  out[tbio >= 18 & tbio < 24 & pann >= 1000 & pann < 4000 & pet_ratio >= 1] <- 4
   out[tbio >= 18 & tbio < 24 & pann >= 1000 & pann < 4000 & pet_ratio >= 0.5 & pet_ratio < 1] <- 5
+  out[tbio >= 18 & tbio < 24 & pann >= 1000 & pann < 4000 & pet_ratio < 0.5] <- 6
   
-  # Bosque muy húmedo premontano
-  out[tbio >= 18 & tbio < 24 & pann >= 2000 & pet_ratio < 0.5] <- 6
+  out[tbio >= 18 & tbio < 24 & pann >= 4000 & pet_ratio >= 0.5] <- 5
+  out[tbio >= 18 & tbio < 24 & pann >= 4000 & pet_ratio < 0.5] <- 6
   
-  # Bosque húmedo montano bajo
+  # 3. Montano bajo: 12 <= tbio < 18
+  out[tbio >= 12 & tbio < 18 & pann < 500] <- 15                  # Montano bajo seco / muy seco
+  out[tbio >= 12 & tbio < 18 & pann >= 500 & pann < 1000] <- 15
   out[tbio >= 12 & tbio < 18 & pann >= 1000 & pann < 4000] <- 7
-  
-  # Bosque muy húmedo montano bajo
   out[tbio >= 12 & tbio < 18 & pann >= 2000 & pet_ratio < 0.5] <- 8
+  out[tbio >= 12 & tbio < 18 & pann >= 4000 & pet_ratio >= 0.5] <- 7
+  out[tbio >= 12 & tbio < 18 & pann >= 4000 & pet_ratio < 0.5] <- 8
   
-  # Bosque húmedo montano
+  # 4. Montano: 6 <= tbio < 12
+  out[tbio >= 6 & tbio < 12 & pann < 500] <- 16                   # Montano seco / muy seco
   out[tbio >= 6 & tbio < 12 & pann >= 500 & pann < 3000] <- 9
-  
-  # Bosque muy húmedo montano
   out[tbio >= 6 & tbio < 12 & pann >= 2000] <- 10
+  out[tbio >= 6 & tbio < 12 & pann >= 3000] <- 10
   
-  # Páramo
+  # 5. Páramo: 3 <= tbio < 6
+  out[tbio >= 3 & tbio < 6 & pann < 500] <- 17                    # Páramo seco
   out[tbio >= 3 & tbio < 6 & pann >= 500] <- 11
   
-  # Superpáramo / zonas muy frías
+  # 6. Superpáramo / zonas muy frías
   out[tbio < 3] <- 12
+  
+  # 7. Valores válidos que aún no entraron en ninguna regla
+  out[is.na(out) & !is.na(tbio) & !is.na(pann) & !is.na(pet_ratio)] <- 99
   
   return(out)
 }
