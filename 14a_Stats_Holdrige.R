@@ -1,24 +1,27 @@
 library(terra)
 library(data.table)
 
-ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems"
+ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/dom_v2"
 oDir <- file.path(ecoDir, "tables")
 dir.create(oDir, recursive = TRUE, showWarnings = FALSE)
 
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Division_administrativa/Tonosi_la_Villa_corregimientos.shp"
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
 
 hz_files <- list.files(
   ecoDir,
-  pattern = "^holdridge",
+  pattern = "^holdridge.*\\.tif$",
   full.names = TRUE
 )
 
-hz_files <- hz_files[!dir.exists(hz_files)]
-
 print(hz_files)
 
+# ============================================================
+# Clases Holdridge actualizadas
+# ============================================================
+
 holdridge_classes <- data.table(
-  Holdridge = 1:12,
+  Holdridge = c(1:17, 99),
   Holdridge_name = c(
     "Bosque seco tropical",
     "Bosque húmedo tropical",
@@ -31,9 +34,19 @@ holdridge_classes <- data.table(
     "Bosque húmedo montano",
     "Bosque muy húmedo montano",
     "Páramo",
-    "Superpáramo / zonas muy frías"
+    "Superpáramo / zonas muy frías",
+    "Tropical muy seco / árido",
+    "Premontano muy seco / árido",
+    "Montano bajo seco / muy seco",
+    "Montano seco / muy seco",
+    "Páramo seco",
+    "No clasificado"
   )
 )
+
+# ============================================================
+# Extraer estadísticas por Corregimiento
+# ============================================================
 
 extract_holdridge_stats <- function(hz_file) {
   
@@ -46,11 +59,19 @@ extract_holdridge_stats <- function(hz_file) {
   mask_adm1 <- project(mask_adm1, crs(hz))
   mask_adm1$ZONE_ID <- 1:nrow(mask_adm1)
   
+  # adm_lookup <- data.table(
+  #   ZONE_ID = mask_adm1$ZONE_ID,
+  #   Provincia = mask_adm1$COUNTRY,
+  #   Distrito = mask_adm1$NAME_1,
+  #   Corregimiento = mask_adm1$NAME_2
+  # )
+  
+  #dom
   adm_lookup <- data.table(
     ZONE_ID = mask_adm1$ZONE_ID,
-    Provincia = mask_adm1$Provincia,
-    Distrito = mask_adm1$Distrito,
-    Corregimiento = mask_adm1$Corregimie
+    Provincia = mask_adm1$PROV,
+    Distrito = mask_adm1$MUN,
+    Corregimiento = mask_adm1$CODIGO
   )
   
   zones <- rasterize(
@@ -78,7 +99,24 @@ extract_holdridge_stats <- function(hz_file) {
   out <- merge(out, adm_lookup, by = "ZONE_ID", all.x = TRUE)
   out <- merge(out, holdridge_classes, by = "Holdridge", all.x = TRUE)
   
+  out[is.na(Holdridge_name), Holdridge_name := "Clase no definida"]
+  
   out[, Scenario := tools::file_path_sans_ext(basename(hz_file))]
+  
+  setcolorder(
+    out,
+    c(
+      "Scenario",
+      "Provincia",
+      "Distrito",
+      "Corregimiento",
+      "ZONE_ID",
+      "Holdridge",
+      "Holdridge_name",
+      "n_cells",
+      "pct_area"
+    )
+  )
   
   out[]
 }
@@ -90,5 +128,5 @@ stats_all <- rbindlist(
 
 fwrite(
   stats_all,
-  file.path(oDir, "holdridge_corregimientos_area_pct.csv")
+  file.path(oDir, "holdridge_AdmLvl3s_area_pct.csv")
 )

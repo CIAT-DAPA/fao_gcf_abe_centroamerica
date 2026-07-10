@@ -39,7 +39,7 @@ bioclim_calc <- function(bDir, ext, suffix){
   for(i in 1:19){
 
     cat("Writting bio", i, "\n")
-    bioAsc <- writeRaster(bios[[i]], paste0(bDir, "/bio_", i, ".", "asc"))
+    bioAsc <- writeRaster(bios[[i]], paste0(bDir, "/bio_", i, ".", ext))
     cat(" .. done")
   }
   
@@ -63,7 +63,7 @@ otp <- bioclim_calc(bDir, ext, suffix)
 ####################
 #### 02 Future  ####
 ####################
-downdir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_30s_ens"
+downdir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_watershed_30s_ens"
 sspList   <- c("ssp_245", "ssp_585")
 perList <- c("2050s", "2070s") 
 ext <- "tif"

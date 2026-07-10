@@ -9,18 +9,28 @@ inputDir <- "Z:/1.Data/Results/climate/04_species"
 outFolder <- file.path(inputDir, "mxe_outputs")
 oDir <- file.path(outFolder, "_stats")
 dir.create(oDir, recursive = TRUE, showWarnings = FALSE)
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
-crs_ref <- crs(rast("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2/prec_1.tif"))
-country <- "hnd"
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
+crs_ref <- crs(rast("Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min/prec_1.tif"))
+country <- "dom"
 
 mask_adm1 <- project(vect(maskFile), crs_ref)
 mask_adm1$ZONE_ID <- 1:nrow(mask_adm1)
 
+# #hnd
+# adm_lookup <- data.table(
+#   ZONE_ID = mask_adm1$ZONE_ID,
+#   Provincia = mask_adm1$COUNTRY,
+#   Distrito = mask_adm1$NAME_1,
+#   Corregimiento = mask_adm1$NAME_2
+# )
+
+#dom
 adm_lookup <- data.table(
   ZONE_ID = mask_adm1$ZONE_ID,
-  AdmLvl1 = mask_adm1$COUNTRY,
-  AdmLvl2 = mask_adm1$NAME_1,
-  AdmLvl3 = mask_adm1$NAME_2
+  Provincia = mask_adm1$PROV,
+  Distrito = mask_adm1$MUN,
+  Corregimiento = mask_adm1$CODIGO
 )
 
 projectionList_raw <- c(
@@ -38,15 +48,25 @@ projection_lookup <- data.table(
   Period = c("2050s", "2070s", "2050s", "2070s")
 )
 
-suffix <- "average_v2"
+suffix <- "wcl_v21_2_5min"
 
+#hnd
+# speciesList <- c(
+#   "alouatta_palliata",
+#   "amazona_autumnalis",
+#   "ceiba_pentandra",
+#   "enterolobium_cyclocarpum",
+#   "liquidambar_styraciflua",
+#   "pharomachrus_mocinno"
+# )
+#dom
 speciesList <- c(
-  "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
-  "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "solenodon_paradoxus",
+  "magnolia_pallescens",
+  "leuenbergeria_quisqueyana",
+  "cyclura_cornuta",
+  "juniperus_gracilior",
+  "amazona_ventralis"
 )
 
 # -----------------------------
@@ -113,7 +133,7 @@ zonal_stats_maxent <- function(r, zones, adm_lookup, stat_name, species, scenari
   setcolorder(
     out,
     c("species", "variable", "SSP", "Period",
-      "ZONE_ID", "AdmLvl1", "AdmLvl2", "AdmLvl3",
+      "ZONE_ID", "Provincia", "Distrito", "Corregimiento",
       "mean_value", "sd_value", "min_value", "max_value")
   )
   

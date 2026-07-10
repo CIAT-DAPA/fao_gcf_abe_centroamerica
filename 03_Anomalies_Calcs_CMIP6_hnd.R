@@ -20,7 +20,8 @@ seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
 #msk <- as(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_HND_0.shp"), "Spatial")
 mask <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
 
-scn_list <- "ssp_585"
+scn_list <- c("ssp_370")
+
 
 for (scn in scn_list){
   
@@ -77,30 +78,41 @@ for (scn in scn_list){
         # Loop throught seasons
         for (i in 1:length(seasons)){
           
-          if (!file.exists(paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''))){
+          if (!file.exists(paste(bDir,'/', var, "_", names(seasons[i]), '.asc',sep=''))){
             cat("Calcs ", var, names(seasons[i]), "\n")
             
             # Load averages files 
-            iAvg <- stack(paste(bDir,'/', var, "_", 1:12, ".tif",sep=''))
+            iAvg <- stack(paste(bDir,'/', var, "_", 1:12, ".asc",sep=''))
             
             if (var == "prec"){
               sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){sum(x,na.rm=any(!is.na(x)))})
             } else {
               sAvg = calc(iAvg[[c(seasons[i], recursive=T)]],fun=function(x){mean(x,na.rm=T)})
             }
-            writeRaster(sAvg, paste(bDir,'/', var, "_", names(seasons[i]), '.tif',sep=''),format="GTiff", overwrite=T)
+            writeRaster(sAvg, paste(bDir,'/', var, "_", names(seasons[i]), '.asc',sep=''), overwrite=T)
           }
           
           
-          if (!file.exists(paste(oDir,'/', var, "_", names(seasons[i]), '.tif',sep=''))){ 
+          if (!file.exists(paste(oDir,'/', var, "_", names(seasons[i]), '.tif',sep=''))){
             
             cat("Calcs ", var, names(seasons[i]), "\n")
             
-            bsl <- raster(paste0(bDir, "/", var, "_", names(seasons[i]), ".tif"))
+            bsl <- mask(crop(raster(paste0(bDir, "/", var, "_", names(seasons[i]), ".asc")), mask), mask)
             del <- raster(paste0(dDir, "/", scn, "/", gcm, "/", period, "/", var, "_",names(seasons[i]), ".tif"))
             
             if (var == "prec"){
-              anom <- del/bsl - 1
+              # anom <- del/bsl - 1
+              
+              #modifica las zonas donde la precipitación climatológica mensual es inferior a 5 mm, evitando anomalías numéricamente inestables
+              denom <- bsl
+              denom[denom < 20] <- 20 # piso mínimo de 5 mm
+              anom <- (del - bsl) / denom
+              
+              # eps <- 0.01 # mm
+              # anom <- del / (bsl + eps) - 1
+              anom[anom > 1] <- 1     # máximo +100%
+              anom[anom < -1] <- -1   # mínimo -100%
+              
             } else {
               anom <- del - bsl
             }
