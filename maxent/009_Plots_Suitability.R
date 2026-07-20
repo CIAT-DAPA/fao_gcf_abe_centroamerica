@@ -18,28 +18,29 @@ library(terra)
 # Set params
 inputDir <- "Z:/1.Data/Results/climate/04_species"
 outFolder <- paste(inputDir, "/mxe_outputs", sep="")
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/02_climate_change/hnd_30s_anom_ens/ssp_245/2050s/prec_1_avg.tif"))
-mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"), crs_ref), "Spatial")
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/02_climate_change/cri_2_5min_ens/ssp_245/2050s/prec_1.tif"))
+mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"), crs_ref), "Spatial")
 mask_adm2 <- mask_adm1
 projectionList <- c("ssp_245/2050s","ssp_245/2070s","ssp_585/2050s", "ssp_585/2070s")
-id <- c("2050 SSP2-4.5", "2050s SSP5-8.5",
-        "2070 SSP2-4.5", "2070s SSP5-8.5"
-)
+id <- c("2050 SSP2-4.5", "2050s SSP5-8.5", "2070 SSP2-4.5", "2070s SSP5-8.5")
 sspLsMod <- c("SSP2-4.5", "SSP5-8.5")
 yearLs <- c("2050s", "2070s")
 projectionList <- gsub("/", "_", projectionList)
-suffix <- "average_v2"
+suffix <- "wcl_v21_30s"
 oDir <- paste0(outFolder, "/_plots")
 if (!file.exists(oDir)) {dir.create(oDir)}
+raster_res <- raster("Z:/1.Data/Results/climate/04_species/masks/cri_dem.tif")
+resample <- F
 
 speciesList <- c(
   "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
+  "crocodylus_acutus",
   "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "jabiru_mycteria",
+  "pachira_aquatica",
+  "rhizophora_mangle"
 )
+
 
 for(spID in speciesList){
   
@@ -47,6 +48,7 @@ for(spID in speciesList){
 
   suitH <- raster(paste(outName, "/crossval/", paste0(toupper(substr(spID, 1, 1)), substr(spID, 2, nchar(spID))), "_", suffix , "_avg.asc", sep="")) *100
   suitH_crop <- mask(crop(suitH, extent(mask_adm1)), mask_adm1)
+  if(resample == T){suitH_crop <- resample(suitH_crop, raster_res)}
   
   id_mod <-c("CUR")
   plot <- setZ(suitH_crop, id_mod)
@@ -77,6 +79,8 @@ for(spID in speciesList){
   
   suitC <- stack(paste0(outName, "/projections/changes/",spID, "_", projectionList,  "_EMN",".asc")) *100
   suitC_crop <- mask(crop(suitC, extent(mask_adm1)), mask_adm1)
+  if(resample == T){suitC_crop <- resample(suitC_crop, raster_res)}
+  
   
   # Set limits
   suitC_crop[which(suitC_crop[]< (-100))] = (-100)

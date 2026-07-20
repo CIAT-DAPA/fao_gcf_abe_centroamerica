@@ -11,13 +11,14 @@ library(latticeExtra)
 
 outDir <- "Z:/1.Data/Results/climate/03_ecosistems"
 # bDir <- "Z:/1.Data/Results/climate/01_baseline/hnd/average_v2_watershed"
-bDir <- "Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min"
+bDir <- "Z:/1.Data/Results/climate/01_baseline/gtm/wcl_v21_2_5min"
 # downdir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_watershed_30s_ens"
-downdir <- "Z:/1.Data/Results/climate/02_climate_change/dom_2_5min_ens"
+downdir <- "Z:/1.Data/Results/climate/02_climate_change/gtm_2_5min_ens"
 sspList   <- c("ssp_245", "ssp_585")
 perList <- c("2050s", "2070s") 
 # maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
+maskFile <-"Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
 
 dir.create(outDir, recursive = TRUE, showWarnings = FALSE)
 
@@ -165,7 +166,7 @@ run_holdridge <- function(climDir, suffix, ext) {
 
 hz_bsl <- run_holdridge(
   climDir = bDir,
-  suffix = "1981-2010",
+  suffix = "1970-2000",
   ext = "tif"
 )
 

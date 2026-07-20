@@ -9,12 +9,12 @@ require(sf)
 require(dismo)
 
 # Set params
-cDir <- "Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min"
-fDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_2_5min_anom_ens"
+cDir <- "Z:/1.Data/Results/climate/01_baseline/gtm/wcl_v21_2_5min"
+fDir <- "Z:/1.Data/Results/climate/02_climate_change/gtm_2_5min_anom_ens"
 varLs <- c("prec", "tmean", "tmax", "tmin")
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations"
-mask <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao.shp"
-mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/gtm_evaluations"
+mask <- "Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
+mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/gtm/gtm_msk_2_5m.tif"
 sspLs <- c("ssp_245", "ssp_585")
 prdLs <- c("2050s", "2070s")
 ssnLs <- c("djf", "mam", "jja", "son", "ann")

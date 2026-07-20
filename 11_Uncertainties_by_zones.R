@@ -15,14 +15,14 @@ require(rgdal)
 require(ggplot2)
 
 sspLs <- c("ssp_245","ssp_585") #"ssp_126",
-oDir <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations"
-oStat <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations/climate_stats_by_season_v2.csv"
+oDir <- "Z:/1.Data/Results/climate/02_climate_change/gtm_evaluations"
+oStat <- "Z:/1.Data/Results/climate/02_climate_change/gtm_evaluations/climate_stats_by_season_v2.csv"
 #ctrList <- c("BHS", "BLZ", "CRI", "CUB", "DOM", "GTM", "HND", "HTI", "JAM", "NIC", "PAN", "PRI", "SLV", "MEX")
-oDirU <- "Z:/1.Data/Results/climate/02_climate_change/dom_evaluations"
+oDirU <- "Z:/1.Data/Results/climate/02_climate_change/gtm_evaluations"
 
 # mask <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"
-mask <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"
-mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif"
+mask <- "Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
+mask_rs <- "Z:/1.Data/Results/climate/00_admin_data/gtm/gtm_msk_2_5m.tif"
 
 poly <- sf::st_read(mask, quiet = TRUE)
 ctrList <- c("Guayubin", "Mao")
@@ -88,10 +88,10 @@ for(ssp in sspLs){
     scale_x_continuous(breaks = seq(2050, 2070, 20), ) +
     theme(legend.position="none") +
     ylim(-40, 40) + 
-    facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
+    facet_grid(ZONE  ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (%)")
   
-  tiff(PlotP, width=1200, height=600, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=1200, height=400, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   
@@ -141,10 +141,10 @@ for(ssp in sspLs){
     scale_x_continuous(breaks = seq(2030, 2070, 20), ) +
     theme(legend.position="none") +
     ylim(0, 5) + 
-    facet_grid( ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
+    facet_grid(ZONE ~ factor(SEASON, levels=c('DEF', 'MAM', 'JJA', 'SON', 'ANN'))) +
     labs(x="Periodos ", y="Anomalia (C)")
   
-  tiff(PlotP, width=1200, height=600, pointsize=8, compression='lzw',res=150)
+  tiff(PlotP, width=1200, height=400, pointsize=8, compression='lzw',res=150)
   plot(p)
   dev.off()
   

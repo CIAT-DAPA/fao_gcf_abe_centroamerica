@@ -15,20 +15,19 @@ inputDir <- "Z:/1.Data/Results/climate/04_species"
 iDir <- "Z:/1.Data/Results/climate/04_species/occurrence_files"
 iDir_back <- "Z:/1.Data/Results/climate/04_species/background_selection"
 NADir <- "Z:/1.Data/Results/climate/04_species/native-areas/asciigrid"
-dem_file <- "Z:/1.Data/Results/climate/04_species/masks/hnd_dem.tif"
-bio_dir  <- "Z:/1.Data/Results/climate/01_baseline/hnd/average_v2"  
+dem_file <- "Z:/1.Data/Results/climate/04_species/masks/cri_dem.tif"
+bio_dir  <- "Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s"  
 backFilesDir <- "Z:/1.Data/Results/climate/04_species/background_selection"
-msk <- "Z:/1.Data/Results/climate/04_species/masks/hnd_mask.asc"
-country <- "hnd"
+msk <- "Z:/1.Data/Results/climate/04_species/masks/cri_mask.tif"
+country <- "cri"
 
-#specie = "ceroxylon_quindiuense" 
 speciesList <- c(
   "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
+  "crocodylus_acutus",
   "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "jabiru_mycteria",
+  "pachira_aquatica",
+  "rhizophora_mangle"
 )
 buffDist <- 50000
 

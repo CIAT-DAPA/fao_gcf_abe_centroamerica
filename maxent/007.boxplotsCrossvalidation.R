@@ -4,12 +4,12 @@
 ###################################
 inputDir <- "Z:/1.Data/Results/climate/04_species"
 speciesList <- c(
-  "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
-  "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "abies_guatemalensis",
+  "pharomachrus_mocinno",
+  "pinus_ayacahuite",
+  "plectrohyla_guatemalensis",
+  "nasua_narica",
+  "quercus_peduncularis"
 )
 outFolder <- paste(inputDir, "/mxe_outputs", sep="")
 oDir <- paste0(outFolder, "/_plots")

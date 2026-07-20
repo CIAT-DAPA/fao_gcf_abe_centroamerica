@@ -49,7 +49,7 @@ source("000.createChullBuffer.R")
 ###############################################################################################
 ###############################################################################################
 
-theEntireProcess <- function(spID, OSys, inputDir, inCurClimDir, inProjClimDir, projectionList, java) {
+theEntireProcess <- function(spID, OSys, inputDir, inCurClimDir, inProjClimDir, projectionList, java, country) {
 
 	verFile <- paste(inputDir, "/mxe_outputs/sp-", spID, "/ps-", spID, ".run", sep="")
 	
@@ -251,7 +251,7 @@ theEntireProcess <- function(spID, OSys, inputDir, inCurClimDir, inProjClimDir, 
 						NAGridName <- paste(NADir, "/", spID, "/narea.asc.gz", sep="")
 						if (!file.exists(NAGridName)) {
 							cat("The native area does not exist, generating one \n")
-							NAGrid <- chullBuffer(inputDir, occFile, paste(NADir, "/", spID, sep=""), 500000)
+							NAGrid <- chullBuffer(inputDir, occFile, paste(NADir, "/", spID, sep=""), 500000, country)
 							NAGrid <- resample(crop(NAGrid, distMeanPA), distMeanPA, method="ngb")
 						} else {
 							cat("The native area exists, using it \n")

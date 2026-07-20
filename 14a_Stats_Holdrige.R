@@ -1,12 +1,13 @@
 library(terra)
 library(data.table)
 
-ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/dom_v2"
+ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/gtm"
 oDir <- file.path(ecoDir, "tables")
 dir.create(oDir, recursive = TRUE, showWarnings = FALSE)
 
 # maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
+maskFile <-"Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
 
 hz_files <- list.files(
   ecoDir,
@@ -69,9 +70,9 @@ extract_holdridge_stats <- function(hz_file) {
   #dom
   adm_lookup <- data.table(
     ZONE_ID = mask_adm1$ZONE_ID,
-    Provincia = mask_adm1$PROV,
-    Distrito = mask_adm1$MUN,
-    Corregimiento = mask_adm1$CODIGO
+    Provincia = mask_adm1$DEPTO,
+    Distrito = mask_adm1$CODIGO,
+    Corregimiento = mask_adm1$MUNICIPIO
   )
   
   zones <- rasterize(

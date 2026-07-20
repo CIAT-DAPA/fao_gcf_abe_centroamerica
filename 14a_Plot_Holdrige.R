@@ -16,7 +16,8 @@ figDir <- file.path(ecoDir, "_plot")
 dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 
 # maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Division_administrativa/Guayubin_Mao_secciones.shp"
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
+maskFile <-"Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
 
 
 sspList <- c("ssp_245", "ssp_585")
@@ -140,7 +141,7 @@ prep_map <- function(r) {
 # 1. Holdridge actual
 # ============================================================
 
-hz_base_raw <- raster(file.path(ecoDir, "holdridge_1981-2010.tif"))
+hz_base_raw <- raster(file.path(ecoDir, "holdridge_1970-2000.tif"))
 
 mp_base <- prep_map(hz_base_raw)
 hz_base <- mp_base$raster

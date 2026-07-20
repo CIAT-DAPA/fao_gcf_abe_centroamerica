@@ -9,18 +9,18 @@ inputDir <- "Z:/1.Data/Results/climate/04_species"
 outFolder <- file.path(inputDir, "mxe_outputs")
 oDir <- file.path(outFolder, "_stats")
 dir.create(oDir, recursive = TRUE, showWarnings = FALSE)
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
-crs_ref <- crs(rast("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2/prec_1.tif"))
-country <- "hnd"
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
+crs_ref <- crs(rast("Z:/1.Data/Results/climate/02_climate_change/cri_2_5min_ens/ssp_245/2050s/prec_1.tif"))
+country <- "cri"
 
 mask_adm1 <- project(vect(maskFile), crs_ref)
 mask_adm1$ZONE_ID <- 1:nrow(mask_adm1)
 
 adm_lookup <- data.table(
   ZONE_ID = mask_adm1$ZONE_ID,
-  AdmLvl1 = mask_adm1$COUNTRY,
-  AdmLvl2 = mask_adm1$NAME_1,
-  AdmLvl3 = mask_adm1$NAME_2
+  AdmLvl1 = mask_adm1$PROVINCIA,
+  AdmLvl2 = mask_adm1$CANTÓN,
+  AdmLvl3 = mask_adm1$CÓDIGO_DT
 )
 
 projectionList_raw <- c(
@@ -38,15 +38,15 @@ projection_lookup <- data.table(
   Period = c("2050s", "2070s", "2050s", "2070s")
 )
 
-suffix <- "average_v2"
+suffix <- "wcl_v21_30s"
 
 speciesList <- c(
   "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
+  "crocodylus_acutus",
   "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "jabiru_mycteria",
+  "pachira_aquatica",
+  "rhizophora_mangle"
 )
 
 # -----------------------------
