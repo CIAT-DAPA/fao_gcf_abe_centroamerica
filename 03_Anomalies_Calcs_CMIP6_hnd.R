@@ -17,7 +17,7 @@ scn_list <- c("ssp_126", "ssp_245", "ssp_370", "ssp_585")
 perList <- c("2030s", "2050s", "2070s") #, "2090s")
 varList <- c("prec", "tmax", "tmin", "tmean")
 seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
-#msk <- as(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_HND_0.shp"), "Spatial")
+msk <- as(vect("Z:/1.Data/Results/climate/00_admin_data/gadm41_HND_0.shp"), "Spatial")
 mask <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
 
 scn_list <- c("ssp_370")
@@ -130,6 +130,95 @@ for (scn in scn_list){
   }
   
 }
+
+
+
+
+
+### Anomalies NCAR
+
+## Parameters
+dDir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_ncar_raw" 
+bDir <- "Z:/1.Data/Results/climate/02_climate_change/hnd_ncar_raw/historical" 
+scn_list <- c("ssp_585")
+perList <- c("2050s", "2070s")
+perListmod <- c("2040-2059", "2060-2079")
+varList <- c("prec", "tmean")
+varListmod <- c("pr", "tas")
+seasons <- list("djf"=c(12,1,2), "mam"=3:5, "jja"=6:8, "son"=9:11, "ann"=1:12)
+msk <- sf::as_Spatial(sf::st_as_sf(terra::vect("Z:/1.Data/Results/climate/00_admin_data/hnd/gadm41_HND_0.shp")))
+# mask <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
+
+
+for (scn in scn_list){
   
+  for (p in 1:length(perList)) {
+    
+    cat("Anomalies calcs over: ", scn, perList[p], "\n")
+    
+    oDir <- paste0(dDir, "_anom_ens/", scn, "/", perList[p])
+    if (!file.exists(oDir)) {dir.create(oDir, recursive=T)}
+    
+    for (v in 1:length(varList)){
+      
+      del <- stack(paste0(dDir, "/","climatology-", varListmod[v], "-monthly-mean_bcr-x4_gard-ensemble-all-", gsub("_", "", scn), "_climatology_median_", perListmod[p], ".nc"))
+      bsl <- stack(paste0(bDir, "/", "timeseries-", varListmod[v], "-monthly-mean_bcr-x4_gpep-bcr-v0.3-historical_timeseries_mean_1981-2022.nc"))
+      clim <- raster::stackApply(bsl[[1:360]], indices = rep(1:12, 30), fun = mean, na.rm = TRUE)
+      
+      clim_ann <- setNames(raster::calc(clim, if (varListmod[v] == "pr") sum else mean, na.rm = TRUE), "ann")
+      del_ann <- setNames(raster::calc(del, if (varListmod[v] == "pr") sum else mean, na.rm = TRUE), "ann")
+      
+      del <- mask(crop(del, msk), msk)
+      clim <-mask(crop(clim, msk), msk)
+      
+      for (mth in 1:12){
+        
+        if (varList[v] == "prec"){
+          
+          anom <- del[[mth]]/clim[[mth]] - 1
+          anom[anom > 1] <- 1     # máximo +100%
+          anom[anom < -1] <- -1   # mínimo -100%
+          
+        } else {
+          anom <- del[[mth]] - clim[[mth]]
+        }
+        
+        if (!file.exists(paste(oDir, "/", varList[v], "_", mth,".tif", sep=""))) {
+          writeRaster(anom, paste(oDir, "/", varList[v], "_", mth, '.tif',sep=''), format="GTiff", overwrite=T)
+        }
+      }
+      
+      del <- stack(stack(paste0(dDir, "/climatology-", varListmod[v], "-seasonal-mean_bcr-x4_gard-ensemble-all-", gsub("_", "", scn), "_climatology_median_", perListmod[p], ".nc")), 
+                   del_ann)     
+      bsl <- stack(paste0(bDir, "/", "timeseries-", varListmod[v], "-seasonal-mean_bcr-x4_gpep-bcr-v0.3-historical_timeseries_mean_1981-2022.nc"))
+      clim <- stack(raster::stackApply(bsl[[1:120]], rep(1:4, 30), mean, na.rm = TRUE), 
+                    clim_ann)
+
+      del <- mask(crop(del, msk), msk)
+      clim <-mask(crop(clim, msk), msk)
+      
+      for (s in 1:length(seasons)){
+        
+        if (varList[v] == "prec"){
+          
+          anom <- del[[s]]/clim[[s]] - 1
+          anom[anom > 1] <- 1     # máximo +100%
+          anom[anom < -1] <- -1   # mínimo -100%
+          
+        } else {
+          anom <- del[[s]] - clim[[s]]
+        }
+        
+        if (!file.exists(paste(oDir, "/", varList[v], "_", names(seasons[s]),".tif", sep=""))) {
+          writeRaster(anom, paste(oDir, "/", varList[v], "_", names(seasons[s]), '.tif',sep=''), format="GTiff", overwrite=T)
+        }
+        
+      }
+      
+    }
+    
+  }  
   
-  
+}
+
+

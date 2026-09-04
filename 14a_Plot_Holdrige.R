@@ -5,23 +5,45 @@ library(rasterVis)
 library(RColorBrewer)
 library(latticeExtra)
 library(lwgeom)
-
+require(latticeExtra)
+library(lattice)
+library(terra)
+library(grid)
 
 # ============================================================
 # Paths
 # ============================================================
 
-ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems"
+ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/hnd"
 figDir <- file.path(ecoDir, "_plot")
 dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 
 # maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Division_Administrativa/Choluteca_adm2.shp"
 # maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"
-maskFile <-"Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
+# maskFile <-"Z:/1.Data/Results/climate/00_admin_data/gtm/cuenca_salinas_gtm_mun.shp"
 
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/cuenca_Tonosi_La_Villa_proj.shp"
+# subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"), crs_ref), "Spatial")
+# subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Panama/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+
+# crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/dom/wcl_v21_2_5min/prec_1.tif"))
+# maskFile <- "Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.shp"
+# subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Cuencas_Drenajes/microcuencas_Guayubin_Mao_proj.shp"), crs_ref), "Spatial")
+# subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Republica_Dominicana/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2_watershed/prec_1.tif"))
+maskFile <- "Z:/1.Data/Results/climate/00_admin_data/hnd/basin1.shp"
+subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
+subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 
 sspList <- c("ssp_245", "ssp_585")
 perList <- c("2050s", "2070s")
+
+resample <- T
+# mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif")
+mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
+
+
 
 # ============================================================
 # Mask: corregimientos + límite de cuenca
@@ -141,7 +163,8 @@ prep_map <- function(r) {
 # 1. Holdridge actual
 # ============================================================
 
-hz_base_raw <- raster(file.path(ecoDir, "holdridge_1970-2000.tif"))
+hz_base_raw <- raster(file.path(ecoDir, "holdridge_1981-2010.tif"))
+if(resample == T){hz_base_raw <- resample(hz_base_raw, raster(mask_rs), method="ngb")}
 
 mp_base <- prep_map(hz_base_raw)
 hz_base <- mp_base$raster
@@ -178,8 +201,11 @@ print(
       )
     )
   ) +
-    latticeExtra::layer(sp.polygons(mp_base$correg, lwd = 0.35, col = "gray30")) +
-    latticeExtra::layer(sp.polygons(mp_base$cuenca, lwd = 1.2, col = "black"))
+    # latticeExtra::layer(sp.polygons(mp_base$correg, lwd = 0.35, col = "gray30")) +
+    # latticeExtra::layer(sp.polygons(mp_base$cuenca, lwd = 1.2, col = "black"))
+    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
+  latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
+    
 )
 
 dev.off()
@@ -204,6 +230,8 @@ for (per in perList) {
     }
     
     r <- raster(f)
+    if(resample == T){r <- resample(r, raster(mask_rs), method="ngb")}
+    
     mp <- prep_map(r)
     
     r_plot <- prep_plot_holdridge(mp$raster)
@@ -253,8 +281,8 @@ print(
       )
     )
   ) +
-    latticeExtra::layer(sp.polygons(mp_future_ref$correg, lwd = 0.35, col = "gray30")) +
-    latticeExtra::layer(sp.polygons(mp_future_ref$cuenca, lwd = 1.2, col = "black"))
+    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
+    latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
 )
 
 dev.off()
@@ -278,6 +306,8 @@ for (per in perList) {
     }
     
     fut <- raster(f)
+    if(resample == T){fut <- resample(fut, raster(mask_rs), method="ngb")}
+    
     mp_fut <- prep_map(fut)
     fut_clip <- mp_fut$raster
     
@@ -340,8 +370,8 @@ print(
       )
     )
   ) +
-    latticeExtra::layer(sp.polygons(mp_base$correg, lwd = 0.35, col = "gray30")) +
-    latticeExtra::layer(sp.polygons(mp_base$cuenca, lwd = 1.2, col = "black"))
+    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
+    latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
 )
 
 dev.off()
