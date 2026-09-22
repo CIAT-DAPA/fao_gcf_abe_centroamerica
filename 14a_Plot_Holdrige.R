@@ -14,7 +14,7 @@ library(grid)
 # Paths
 # ============================================================
 
-ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/hnd"
+ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/cri"
 figDir <- file.path(ecoDir, "_plot")
 dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 
@@ -31,15 +31,21 @@ dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 # subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Cuencas_Drenajes/microcuencas_Guayubin_Mao_proj.shp"), crs_ref), "Spatial")
 # subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Republica_Dominicana/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2_watershed/prec_1.tif"))
-maskFile <- "Z:/1.Data/Results/climate/00_admin_data/hnd/basin1.shp"
-subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
-subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+# crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2_watershed/prec_1.tif"))
+# maskFile <- "Z:/1.Data/Results/climate/00_admin_data/hnd/basin1.shp"
+# subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
+# subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/prec_1.tif"))
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"
+subs1 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
+subs2 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
+
 
 sspList <- c("ssp_245", "ssp_585")
 perList <- c("2050s", "2070s")
 
-resample <- T
+resample <- F
 # mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif")
 mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
 
@@ -163,7 +169,7 @@ prep_map <- function(r) {
 # 1. Holdridge actual
 # ============================================================
 
-hz_base_raw <- raster(file.path(ecoDir, "holdridge_1981-2010.tif"))
+hz_base_raw <- raster(file.path(ecoDir, "holdridge_1970-2000.tif"))
 if(resample == T){hz_base_raw <- resample(hz_base_raw, raster(mask_rs), method="ngb")}
 
 mp_base <- prep_map(hz_base_raw)
@@ -202,9 +208,9 @@ print(
     )
   ) +
     # latticeExtra::layer(sp.polygons(mp_base$correg, lwd = 0.35, col = "gray30")) +
-    # latticeExtra::layer(sp.polygons(mp_base$cuenca, lwd = 1.2, col = "black"))
-    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
-  latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
+    # latticeExtra::layer(sp.polygons(mp_base$cuenca, lwd = 0.5.2, col = "black"))
+    latticeExtra::layer(sp.polygons(subs2, lwd = 0.5, col = "gray70")) +
+  latticeExtra::layer(sp.polygons(subs1, lwd = 0.5, col = "black")) 
     
 )
 
@@ -281,8 +287,8 @@ print(
       )
     )
   ) +
-    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
-    latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
+    latticeExtra::layer(sp.polygons(subs2, lwd = 0.5, col = "gray70")) +
+    latticeExtra::layer(sp.polygons(subs1, lwd = 0.5, col = "black")) 
 )
 
 dev.off()
@@ -370,8 +376,8 @@ print(
       )
     )
   ) +
-    latticeExtra::layer(sp.polygons(subs2, lwd = 1, col = "gray70")) +
-    latticeExtra::layer(sp.polygons(subs1, lwd = 1, col = "black")) 
+    latticeExtra::layer(sp.polygons(subs2, lwd = 0.5, col = "gray70")) +
+    latticeExtra::layer(sp.polygons(subs1, lwd = 0.5, col = "black")) 
 )
 
 dev.off()

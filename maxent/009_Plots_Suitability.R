@@ -17,26 +17,29 @@ library(terra)
 
 # Set params
 inputDir <- "Z:/1.Data/Results/climate/04_species"
-outFolder <- paste(inputDir, "/mxe_outputs/hnd", sep="")
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/hnd/average_v2_watershed/prec_1.tif"))
+outFolder <- paste(inputDir, "/mxe_outputs/cri", sep="")
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/prec_1.tif"))
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"), crs_ref), "Spatial")
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"), crs_ref), "Spatial")
 # mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Panama/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Republica_Dominicana/Cuencas_Drenajes/microcuencas_Guayubin_Mao_proj.shp"), crs_ref), "Spatial")
 # mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Republica_Dominicana/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
-mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
-mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+# mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
+# mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
+mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
+mask_adm2 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
+
 
 projectionList <- c("ssp_245/2050s","ssp_245/2070s","ssp_585/2050s", "ssp_585/2070s")
 id <- c("2050 SSP2-4.5", "2050s SSP5-8.5", "2070 SSP2-4.5", "2070s SSP5-8.5")
 sspLsMod <- c("SSP2-4.5", "SSP5-8.5")
 yearLs <- c("2050s", "2070s")
 projectionList <- gsub("/", "_", projectionList)
-suffix <- "average_v2"
+suffix <- "wcl_v21_30s"
 oDir <- paste0(outFolder, "/_plots")
 if (!file.exists(oDir)) {dir.create(oDir)}
 raster_res <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
-resample <- T
+resample <- F
 
 # speciesList <- c(
 #   "alouatta_palliata",
@@ -65,14 +68,24 @@ resample <- T
 #   "solenodon_paradoxus"
 # )
 
-#hnd
+# #hnd
+# speciesList <- c(
+#   "alouatta_palliata",
+#   "amazona_autumnalis",
+#   "ceiba_pentandra",
+#   "enterolobium_cyclocarpum",
+#   "liquidambar_styraciflua",
+#   "pharomachrus_mocinno"
+# )
+
+#cri
 speciesList <- c(
   "alouatta_palliata",
-  "amazona_autumnalis",
-  "ceiba_pentandra",
+  "crocodylus_acutus",
   "enterolobium_cyclocarpum",
-  "liquidambar_styraciflua",
-  "pharomachrus_mocinno"
+  "jabiru_mycteria",
+  "pachira_aquatica",
+  "rhizophora_mangle"
 )
 
 for(spID in speciesList){
