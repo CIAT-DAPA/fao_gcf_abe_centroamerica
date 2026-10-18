@@ -219,12 +219,12 @@ for (var in varList){
   
   if (var == "prec"){
     
-    stk_crop[which(stk_crop[]>4500)]=4500
+    stk_crop[which(stk_crop[]>3000)]=3000
     
     plot <- setZ(stk_crop, id_mod)
     names(plot) <- toupper(id_mod)
     
-    zvalues <- seq(0, 4500, 100) # Define limits
+    zvalues <- seq(0, 3000, 100) # Define limits
     myTheme <- BuRdTheme() # Define squeme of colors
     myTheme$regions$col=colorRampPalette(c("khaki1", "skyblue1", "blue", "darkblue", "darkmagenta"))(length(zvalues)-1) # Set new colors
     # myTheme=rasterTheme(region=brewer.pal('Blues', n=9))
