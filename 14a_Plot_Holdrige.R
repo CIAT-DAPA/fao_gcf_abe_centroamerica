@@ -14,7 +14,7 @@ library(grid)
 # Paths
 # ============================================================
 
-ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/cri"
+ecoDir <- "Z:/1.Data/Results/climate/03_ecosistems/gtm"
 figDir <- file.path(ecoDir, "_plot")
 dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 
@@ -36,18 +36,24 @@ dir.create(figDir, recursive = TRUE, showWarnings = FALSE)
 # subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
 # subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/prec_1.tif"))
-maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"
-subs1 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
-subs2 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
+# crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/prec_1.tif"))
+# maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"
+# subs1 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
+# subs2 <- as(project(vect("z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
+
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/gtm/wcl_v21_2_5min/prec_1.tif"))
+maskFile <- "Z:/1.Data/Process/Info_Inputs_SWAT/Guatemala/Rio_Salinas/Cuencas_Drenajes/Unidades_Hidrograficas_Finales.shp"
+subs1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Guatemala/Rio_Salinas/Cuencas_Drenajes/Unidades_Hidrograficas_Finales.shp"), crs_ref), "Spatial")
+subs2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Guatemala/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 
 
 sspList <- c("ssp_245", "ssp_585")
 perList <- c("2050s", "2070s")
 
-resample <- F
+resample <- T
 # mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/dom/guayubin_mao_wgs84.tif")
-mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
+# mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
+mask_rs <- raster("Z:/1.Data/Results/climate/00_admin_data/gtm/gtm_msk_30s.tif")
 
 
 

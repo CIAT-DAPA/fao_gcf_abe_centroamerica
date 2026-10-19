@@ -17,8 +17,8 @@ library(terra)
 
 # Set params
 inputDir <- "Z:/1.Data/Results/climate/04_species"
-outFolder <- paste(inputDir, "/mxe_outputs/cri", sep="")
-crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/prec_1.tif"))
+outFolder <- paste(inputDir, "/mxe_outputs/gtm", sep="")
+crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/gtm/wcl_v21_2_5min/prec_1.tif"))
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Division_Administativa/cuenca_distritos_wgs84.shp"), crs_ref), "Spatial")
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Panama/Tonosi_La_Villa/Cuencas_Drenajes/subcuencas_Tonosi_La_Villa_proj.shp"), crs_ref), "Spatial")
 # mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Panama/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
@@ -26,20 +26,21 @@ crs_ref <- crs(raster("Z:/1.Data/Results/climate/01_baseline/cri/wcl_v21_30s/pre
 # mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Republica_Dominicana/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 # mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Honduras/Choluteca/Cuencas_Drenajes/Agua_Honduras/Subcuencas.shp"), crs_ref), "Spatial")
 # mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Honduras/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
-mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
-mask_adm2 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
-
+# mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cambio_Climatico/subs1.shp"), crs_ref), "Spatial")
+# mask_adm2 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Costa_Rica/Tempisque/Cuencas_Drenajes/Subcuencas_Oficiales_Clip_Cuenca_SWAT-FINAL.shp"), crs_ref), "Spatial")
+mask_adm1 <- as(project(vect("Z:/1.Data/Process/Info_Inputs_SWAT/Guatemala/Rio_Salinas/Cuencas_Drenajes/Unidades_Hidrograficas_Finales.shp"), crs_ref), "Spatial")
+mask_adm2 <- as(project(vect("Z:/1.Data/Results/Salidas&Analysis_SWAT/Guatemala/Espacial/LineaBase/subs1.shp"), crs_ref), "Spatial")
 
 projectionList <- c("ssp_245/2050s","ssp_245/2070s","ssp_585/2050s", "ssp_585/2070s")
-id <- c("2050 SSP2-4.5", "2050s SSP5-8.5", "2070 SSP2-4.5", "2070s SSP5-8.5")
+id <- c("2050 SSP2-4.5",  "2070 SSP2-4.5", "2050s SSP5-8.5","2070s SSP5-8.5")
 sspLsMod <- c("SSP2-4.5", "SSP5-8.5")
 yearLs <- c("2050s", "2070s")
 projectionList <- gsub("/", "_", projectionList)
-suffix <- "wcl_v21_30s"
+suffix <- "wcl_v21_2_5min"
 oDir <- paste0(outFolder, "/_plots")
 if (!file.exists(oDir)) {dir.create(oDir)}
-raster_res <- raster("Z:/1.Data/Results/climate/00_admin_data/hnd/hnd_watersheed_msk_30s.tif")
-resample <- F
+raster_res <- raster("Z:/1.Data/Results/climate/00_admin_data/gtm/gtm_msk_30s.tif")
+resample <- T
 
 # speciesList <- c(
 #   "alouatta_palliata",
@@ -79,13 +80,23 @@ resample <- F
 # )
 
 #cri
+# speciesList <- c(
+#   "alouatta_palliata",
+#   "crocodylus_acutus",
+#   "enterolobium_cyclocarpum",
+#   "jabiru_mycteria",
+#   "pachira_aquatica",
+#   "rhizophora_mangle"
+# )
+
+#gtm
 speciesList <- c(
-  "alouatta_palliata",
-  "crocodylus_acutus",
-  "enterolobium_cyclocarpum",
-  "jabiru_mycteria",
-  "pachira_aquatica",
-  "rhizophora_mangle"
+  "abies_guatemalensis",
+  "nasua_narica",
+  "pharomachrus_mocinno",
+  "pinus_ayacahuite",
+  "plectrohyla_guatemalensis",
+  "quercus_peduncularis"
 )
 
 for(spID in speciesList){
@@ -95,6 +106,7 @@ for(spID in speciesList){
   suitH <- raster(paste(outName, "/crossval/", paste0(toupper(substr(spID, 1, 1)), substr(spID, 2, nchar(spID))), "_", suffix , "_avg.asc", sep="")) *100
   suitH_crop <- mask(crop(suitH, extent(mask_adm2)), mask_adm2)
   if(resample == T){suitH_crop <- mask(resample(suitH_crop, raster_res), raster_res)}
+  suitH_crop <- mask(crop(suitH, extent(mask_adm2)), mask_adm2)
   
   id_mod <-c("CUR")
   plot <- setZ(suitH_crop, id_mod)
@@ -108,7 +120,7 @@ for(spID in speciesList){
   myTheme$axis.line$col = 'white' # Eliminate frame from maps
 
   
-  tiff(paste(oDir, "/suit_", spID, ".tif", sep=""), width=800, height=800, pointsize=8, compression='lzw',res=100)
+  tiff(paste(oDir, "/suit_", spID, ".tif", sep=""), width=800, height=600, pointsize=8, compression='lzw',res=100)
   
   print(levelplot(plot, at = zvalues, 
                   scales = list(draw=FALSE), 
@@ -118,8 +130,8 @@ for(spID in speciesList){
                   par.settings = myTheme, 
                   margin=F,
                   colorkey = list(space = "bottom", width=1.2, height=1, labels=list(cex=1.2)))
-        + latticeExtra::layer(sp.polygons(subs2, lwd = 0.8, col = "gray70")) +
-          latticeExtra::layer(sp.polygons(subs1, lwd = 1.5, col = "black")) 
+        + latticeExtra::layer(sp.polygons(mask_adm2, lwd = 0.8, col = "gray70")) +
+          latticeExtra::layer(sp.polygons(mask_adm1, lwd = 1.5, col = "black")) 
         
   )
   
@@ -128,6 +140,7 @@ for(spID in speciesList){
   suitC <- stack(paste0(outName, "/projections/changes/",spID, "_", projectionList,  "_EMN",".asc")) *100
   suitC_crop <- mask(crop(suitC, extent(mask_adm2)), mask_adm2)
   if(resample == T){suitC_crop <- mask(resample(suitC_crop, raster_res), raster_res)}
+  suitC_crop <- mask(crop(suitC, extent(mask_adm2)), mask_adm2)
   
   
   # Set limits
@@ -144,7 +157,7 @@ for(spID in speciesList){
   myTheme$axis.line$col = 'white'
   
   # Plot via levelplot
-  tiff(paste(oDir, "/suitchg_", spID, "_changes.tif", sep=""), width=1000, height=1000, pointsize=8, compression='lzw',res=100)
+  tiff(paste(oDir, "/suitchg_", spID, "_changes.tif", sep=""), width=1000, height=600, pointsize=8, compression='lzw',res=100)
   
   print(levelplot(plot, at = zvalues,  
                   scales = list(draw=FALSE), 
@@ -157,8 +170,8 @@ for(spID in speciesList){
                   par.settings = myTheme, 
                   colorkey = list(space = "bottom", width=1.2, height=1)
   )
-  + latticeExtra::layer(sp.polygons(subs2, lwd = 0.8, col = "gray70")) +
-    latticeExtra::layer(sp.polygons(subs1, lwd = 1.5, col = "black")) 
+  + latticeExtra::layer(sp.polygons(mask_adm2, lwd = 0.8, col = "gray70")) +
+    latticeExtra::layer(sp.polygons(mask_adm1, lwd = 1.5, col = "black")) 
   
   )
   
